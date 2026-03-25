@@ -6,10 +6,10 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/main.unity
+    path: Assets/Scenes/main.unity
     guid: 82bd3a17f0de24e229e69156b9d1e054
   - enabled: 1
-    path: Assets/mackys.unity
+    path: Assets/Scenes/mackys.unity
     guid: 016874f42ba5448cd8c5a541c6832ca0
   m_configObjects:
     UnityEditor.XR.ARCore.ARCoreSettings: {fileID: 11400000, guid: 74919ca663b2f47a38d319a806ac3126, type: 2}

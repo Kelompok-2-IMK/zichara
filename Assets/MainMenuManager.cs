@@ -3,13 +3,24 @@ using UnityEngine.SceneManagement;
 
 public class MainMenuManager : MonoBehaviour
 {
-    public void StartAR()
+    public void GoToModeSelection()
+    {
+        SceneManager.LoadScene("modeSelection");
+    }
+
+    public void BackToMain()
+    {
+        SceneManager.LoadScene("main");
+    }
+
+    public void StartFreeplay()
     {
         SceneManager.LoadScene("mackys");
     }
 
-    public void OpenGuide()
+    public void QuitGame()
     {
-        Debug.Log("Guide button clicked");
+        Application.Quit();
+        Debug.Log("Game Keluar");
     }
 }
