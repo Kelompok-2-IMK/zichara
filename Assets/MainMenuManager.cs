@@ -8,6 +8,11 @@ public class MainMenuManager : MonoBehaviour
         SceneManager.LoadScene("modeSelection");
     }
 
+    public void GoToLegends()
+    {
+        SceneManager.LoadScene("Legends");
+    }
+
     public void BackToMain()
     {
         SceneManager.LoadScene("main");
