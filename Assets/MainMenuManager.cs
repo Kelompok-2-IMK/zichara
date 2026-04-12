@@ -20,7 +20,7 @@ public class MainMenuManager : MonoBehaviour
 
     public void StartFreeplay()
     {
-        SceneManager.LoadScene("mackys");
+        SceneManager.LoadScene("freeplay");
     }
 
     public void QuitGame()
