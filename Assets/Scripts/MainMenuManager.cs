@@ -5,7 +5,7 @@ public class MainMenuManager : MonoBehaviour
 {
     public void GoToModeSelection()
     {
-        SceneManager.LoadScene("modeSelection");
+        SceneManager.LoadScene("ModeSelection");
     }
 
     public void GoToLegends()
@@ -13,14 +13,29 @@ public class MainMenuManager : MonoBehaviour
         SceneManager.LoadScene("Legends");
     }
 
-    public void BackToMain()
+    public void GoToPanduan()
     {
-        SceneManager.LoadScene("main");
+        SceneManager.LoadScene("Panduan");
+    }
+
+    public void GoToMain()
+    {
+        SceneManager.LoadScene("MainMenu");
     }
 
     public void StartFreeplay()
     {
         SceneManager.LoadScene("freeplay");
+    }
+
+    public void GoToScan()
+    {
+        SceneManager.LoadScene("Scan");
+    }
+
+    public void GoToLevel()
+    {
+        SceneManager.LoadScene("Level");
     }
 
     public void QuitGame()
