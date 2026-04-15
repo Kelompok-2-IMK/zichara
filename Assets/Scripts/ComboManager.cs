@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections; // Wajib ada untuk Coroutine
 
 public class ComboManager : MonoBehaviour
 {
@@ -6,14 +7,18 @@ public class ComboManager : MonoBehaviour
     public bool kartu1Active = false;
     public bool kartu2Active = false;
     
-    [Header("Referensi Objek Kartu (Tarik dari Hierarchy)")]
+    [Header("Settings")]
+    public float loseDelay = 0.5f; // Waktu tunggu sebelum status jadi false
+
+    [Header("Referensi Objek")]
     public Transform kartu1Transform; 
     public Transform kartu2Transform;
+    public GameObject modelFBXCombo; 
+    public GameObject modelKartu1;   
+    public GameObject modelKartu2;
 
-    [Header("Model Settings")]
-    public GameObject modelFBXCombo; // Ini untuk si 'kyut'
-    public GameObject modelKartu1;   // Model 'monyet'
-    public GameObject modelKartu2;   // Model 'wo'
+    private Coroutine delayK1;
+    private Coroutine delayK2;
 
     void Update()
     {
@@ -22,30 +27,25 @@ public class ComboManager : MonoBehaviour
 
     void UpdateLogic()
     {
-        // 1. Kondisi COMBO: Keduanya muncul
         if (kartu1Active && kartu2Active) 
         {
             SetModelStates(true, false, false);
-            FollowMiddlePoint(); // Pindahkan 'kyut' ke tengah
+            FollowMiddlePoint();
         } 
-        // 2. Cuma kartu 1 (monyet)
         else if (kartu1Active) 
         {
             SetModelStates(false, true, false);
         }
-        // 3. Cuma kartu 2 (wo)
         else if (kartu2Active) 
         {
             SetModelStates(false, false, true);
         }
-        // 4. Tidak ada kartu sama sekali (Force Hide)
         else 
         {
             SetModelStates(false, false, false);
         }
     }
 
-    // Fungsi pembantu agar kode Update tidak kepanjangan
     void SetModelStates(bool combo, bool m1, bool m2)
     {
         if(modelFBXCombo != null) modelFBXCombo.SetActive(combo);
@@ -53,21 +53,53 @@ public class ComboManager : MonoBehaviour
         if(modelKartu2 != null) modelKartu2.SetActive(m2);
     }
 
-    // Fungsi agar si 'kyut' berada di tengah-tengah dua kartu
+    // --- FUNGSI UNTUK VUFORIA ---
+
+    public void SetKartu1(bool status) 
+    {
+        if (status) // Jika Terdeteksi (True)
+        {
+            if (delayK1 != null) StopCoroutine(delayK1);
+            kartu1Active = true;
+        }
+        else // Jika Hilang (False)
+        {
+            delayK1 = StartCoroutine(WaitToLoseK1());
+        }
+    }
+
+    public void SetKartu2(bool status) 
+    {
+        if (status) 
+        {
+            if (delayK2 != null) StopCoroutine(delayK2);
+            kartu2Active = true;
+        }
+        else 
+        {
+            delayK2 = StartCoroutine(WaitToLoseK2());
+        }
+    }
+
+    IEnumerator WaitToLoseK1()
+    {
+        yield return new WaitForSeconds(loseDelay);
+        kartu1Active = false;
+    }
+
+    IEnumerator WaitToLoseK2()
+    {
+        yield return new WaitForSeconds(loseDelay);
+        kartu2Active = false;
+    }
+
     void FollowMiddlePoint()
     {
         if (modelFBXCombo != null && kartu1Transform != null && kartu2Transform != null)
         {
-            // Rumus posisi tengah: (A + B) / 2
             Vector3 midPoint = (kartu1Transform.position + kartu2Transform.position) / 2f;
             modelFBXCombo.transform.position = midPoint;
-
-            // Optional: Agar kyut menghadap ke arah rata-rata rotasi kartu
             modelFBXCombo.transform.rotation = Quaternion.Slerp(kartu1Transform.rotation, kartu2Transform.rotation, 0.5f);
         }
     }
-
-    // Fungsi pemicu dari Vuforia (Default Observer Event Handler)
-    public void SetKartu1(bool status) { kartu1Active = status; }
-    public void SetKartu2(bool status) { kartu2Active = status; }
 }

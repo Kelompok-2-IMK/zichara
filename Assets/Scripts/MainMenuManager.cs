@@ -25,7 +25,7 @@ public class MainMenuManager : MonoBehaviour
 
     public void StartFreeplay()
     {
-        SceneManager.LoadScene("Dev");
+        SceneManager.LoadScene("freeplay");
     }
 
     public void GoToScan()
