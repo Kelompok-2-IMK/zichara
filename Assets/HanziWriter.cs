@@ -1,0 +1,34 @@
+using System.Collections;
+using UnityEngine;
+
+public class HanziWriter : MonoBehaviour
+{
+    public float delayBetweenStrokes = 0.4f;
+
+    void Start()
+    {
+        // Sembunyikan semua stroke di awal
+        foreach (Transform child in transform)
+            child.gameObject.SetActive(false);
+
+        StartCoroutine(Write());
+    }
+
+    IEnumerator Write()
+    {
+        yield return new WaitForSeconds(0.5f);
+
+        foreach (Transform child in transform)
+        {
+            StrokeDraw sd = child.GetComponent<StrokeDraw>();
+            child.gameObject.SetActive(true);
+
+            if (sd != null)
+                sd.PlayStroke();
+
+            // Tunggu sampai stroke selesai baru lanjut ke berikutnya
+            float waitTime = sd != null ? sd.duration + delayBetweenStrokes : delayBetweenStrokes;
+            yield return new WaitForSeconds(waitTime);
+        }
+    }
+}
