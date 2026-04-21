@@ -21,7 +21,7 @@ EditorBuildSettings:
     path: Assets/Scenes/Level.unity
     guid: f41d80e5f21fa514bad32044def9cf65
   - enabled: 1
-    path: Assets/Scenes/Scan.unity
+    path: Assets/Scenes/Scan1.unity
     guid: dcca57add8e65b34aba2db9ced51c740
   - enabled: 1
     path: Assets/Scenes/Panduan.unity
