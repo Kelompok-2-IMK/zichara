@@ -1335,7 +1335,7 @@ MonoBehaviour:
   popupPanel: {fileID: 1017715921}
   popupTitleText: {fileID: 1007194570}
   popupBodyText: {fileID: 1007194570}
-  popupCloseButton: {fileID: 431688761}
+  popupCloseButton: {fileID: 138505749}
   checklistPanel: {fileID: 1066004892}
   checklistText: {fileID: 1100521055}
 --- !u!1 &1100521054
@@ -2435,8 +2435,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80ca6bdcd30656845806af58d22dc946, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CardSynthesisManager
-  currentActiveMission: {fileID: 11400000, guid: eccea5366a115644290783997dba64ee, type: 2}
-  proximityThreshold: 0.15
+  currentActiveMission: {fileID: 0}
+  proximityThreshold: 2
+  OnSynthesisSuccess:
+    m_PersistentCalls:
+      m_Calls: []
   cardsOnCamera: []
 --- !u!1 &2072165929
 GameObject:
