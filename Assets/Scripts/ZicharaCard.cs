@@ -1,6 +1,6 @@
 using UnityEngine;
 using Vuforia;
-using System.Collections; // Wajib untuk Coroutine
+using System.Collections;
 
 [RequireComponent(typeof(ObserverBehaviour))]
 public class ZicharaCard : MonoBehaviour
@@ -11,44 +11,74 @@ public class ZicharaCard : MonoBehaviour
     public float lostDelay = 0.75f; 
 
     private ObserverBehaviour mObserverBehaviour;
-    private Coroutine lostCoroutine; // Menyimpan timer
+    private Coroutine lostCoroutine;
 
     void Start()
     {
         mObserverBehaviour = GetComponent<ObserverBehaviour>();
         if (mObserverBehaviour)
+        {
             mObserverBehaviour.OnTargetStatusChanged += OnTargetStatusChanged;
+
+            // --- TAMBAHAN PENTING ---
+            // Cek status saat ini juga. Kadang pas Start, kartu sudah terdeteksi
+            if (mObserverBehaviour.TargetStatus.Status == Status.TRACKED || 
+                mObserverBehaviour.TargetStatus.Status == Status.EXTENDED_TRACKED)
+            {
+                ReportArrival();
+            }
+        }
     }
 
     private void OnTargetStatusChanged(ObserverBehaviour behaviour, TargetStatus targetStatus)
     {
-        // Jika kartu TERLIHAT
         if (targetStatus.Status == Status.TRACKED || targetStatus.Status == Status.EXTENDED_TRACKED)
         {
-            // Batalkan proses penghapusan jika kartu kembali terlihat cepat
             if (lostCoroutine != null) 
             {
                 StopCoroutine(lostCoroutine);
                 lostCoroutine = null;
             }
-            CardSynthesisManager.Instance.AddActiveCard(this);
+            ReportArrival();
         }
-        else // Jika kartu HILANG
+        else 
         {
-            // Jangan langsung dihapus, tunggu sebentar (Anti-Flicker)
             if (gameObject.activeInHierarchy)
+            {
+                if (lostCoroutine != null) StopCoroutine(lostCoroutine);
                 lostCoroutine = StartCoroutine(DelayedRemove());
+            }
+        }
+    }
+
+    // Fungsi helper supaya lebih rapi dan aman dari NullReference
+    private void ReportArrival()
+    {
+        if (CardSynthesisManager.Instance != null)
+        {
+            CardSynthesisManager.Instance.AddActiveCard(this);
         }
     }
 
     private IEnumerator DelayedRemove()
     {
         yield return new WaitForSeconds(lostDelay);
-        CardSynthesisManager.Instance.RemoveActiveCard(this);
+        if (CardSynthesisManager.Instance != null)
+        {
+            CardSynthesisManager.Instance.RemoveActiveCard(this);
+        }
+        lostCoroutine = null;
     }
 
     private void OnDestroy()
     {
-        if (mObserverBehaviour) mObserverBehaviour.OnTargetStatusChanged -= OnTargetStatusChanged;
+        // Pastikan lapor pergi saat object dihancurkan agar tidak nyangkut di list Manager
+        if (CardSynthesisManager.Instance != null)
+        {
+            CardSynthesisManager.Instance.RemoveActiveCard(this);
+        }
+
+        if (mObserverBehaviour) 
+            mObserverBehaviour.OnTargetStatusChanged -= OnTargetStatusChanged;
     }
 }
