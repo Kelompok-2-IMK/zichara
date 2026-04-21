@@ -358,6 +358,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Card
   cardID: Bao
+  lostDelay: 0.75
 --- !u!114 &379955501
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -799,6 +800,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Card
   cardID: Shu
+  lostDelay: 0.75
 --- !u!114 &610367637
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1332,12 +1334,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23cf3ceb3d3f8774e81c72f6e3280b9c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIManager
-  popupPanel: {fileID: 1017715921}
-  popupTitleText: {fileID: 1007194570}
-  popupBodyText: {fileID: 1007194570}
-  popupCloseButton: {fileID: 138505749}
-  checklistPanel: {fileID: 1066004892}
-  checklistText: {fileID: 1100521055}
 --- !u!1 &1100521054
 GameObject:
   m_ObjectHideFlags: 0
@@ -1759,6 +1755,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Card
   cardID: Mian
+  lostDelay: 0.75
 --- !u!114 &1429815856
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2435,11 +2432,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80ca6bdcd30656845806af58d22dc946, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CardSynthesisManager
-  currentActiveMission: {fileID: 0}
+  levelMissions:
+  - {fileID: 11400000, guid: 683bc66e25e6b4e4495292870971d511, type: 2}
   proximityThreshold: 2
-  OnSynthesisSuccess:
-    m_PersistentCalls:
-      m_Calls: []
+  currentMission: {fileID: 11400000, guid: 683bc66e25e6b4e4495292870971d511, type: 2}
   cardsOnCamera: []
 --- !u!1 &2072165929
 GameObject:
