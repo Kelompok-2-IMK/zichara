@@ -1,18 +1,33 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class CardSynthesisManager : MonoBehaviour
 {
     public static CardSynthesisManager Instance { get; private set; }
 
-    [Header("Pengaturan Misi")]
-    public MissionData currentActiveMission; // Misi yang sedang jalan
-    public float proximityThreshold = 0.15f; // Jarak maksimal antar kartu (dalam meter/unit Unity)
+    [Header("Antrean Level 1")]
+    [Tooltip("Masukkan Misi 1, lalu Misi 2 ke daftar ini secara berurutan")]
+    public List<MissionData> levelMissions; 
+    public float proximityThreshold = 2.0f;
 
-    [Header("Debug Status (Jangan Diisi)")]
-    public List<Card> cardsOnCamera = new List<Card>();
+    [Header("Integrasi UI (Tugas Temanmu)")]
+    public UnityEvent<MissionData> OnMissionStarted; // Trigger saat misi baru mulai
+    public UnityEvent<MissionData> OnMissionSuccess; // Trigger saat misi selesai
+    
+    // Opsional: Untuk coret checklist tiap 1 barang ketemu di Misi 1
+    public UnityEvent<string> OnItemDiscovered; 
 
-    private bool missionAlreadyCompleted = false;
+    [Header("Debug Status")]
+    public MissionData currentMission;
+    public List<ZicharaCard> cardsOnCamera = new List<ZicharaCard>();
+    
+    private int currentMissionIndex = 0;
+    private bool isMissionFinished = false;
+    
+    // Ingatan tentang resep apa yang sudah dibuat dan objek 3D yang muncul
+    private List<string> completedRecipesInMission = new List<string>();
+    private List<GameObject> active3DObjects = new List<GameObject>();
 
     private void Awake()
     {
@@ -20,92 +35,154 @@ public class CardSynthesisManager : MonoBehaviour
         else Destroy(gameObject);
     }
 
-    // --- FUNGSI DARI PRAJURIT ---
-    public void AddActiveCard(Card card)
+    private void Start()
+    {
+        // Mulai antrean level dari Misi 1 (Index 0)
+        if (levelMissions.Count > 0)
+        {
+            LoadMission(0);
+        }
+    }
+
+    public void AddActiveCard(ZicharaCard card)
     {
         if (!cardsOnCamera.Contains(card)) cardsOnCamera.Add(card);
     }
 
-    public void RemoveActiveCard(Card card)
+    public void RemoveActiveCard(ZicharaCard card)
     {
         if (cardsOnCamera.Contains(card)) cardsOnCamera.Remove(card);
     }
 
-    // --- LOGIKA PENGGABUNGAN (JANTUNG AR) ---
     private void Update()
     {
-        // Jika tidak ada misi, atau misi sudah beres, jangan lakukan apa-apa
-        if (currentActiveMission == null || missionAlreadyCompleted) return;
-
-        // Cek apakah jumlah kartu di layar sudah memenuhi syarat misi
-        if (cardsOnCamera.Count >= currentActiveMission.requiredCards.Count)
-        {
-            CheckCardCombination();
-        }
+        if (currentMission == null || isMissionFinished) return;
+        CheckRecipes();
     }
 
-    private void CheckCardCombination()
+    private void CheckRecipes()
     {
-        // 1. Pastikan semua kartu yang dibutuhkan misi ADA di depan kamera
-        foreach (string reqCard in currentActiveMission.requiredCards)
+        // Mengecek semua resep yang ada di misi saat ini
+        foreach (CardRecipe recipe in currentMission.recipes)
         {
-            bool cardFound = false;
-            foreach (Card activeCard in cardsOnCamera)
+            // Abaikan jika resep ini sudah berhasil dibuat sebelumnya (misal Roti udah, tinggal Tas)
+            if (completedRecipesInMission.Contains(recipe.recipeName)) continue;
+
+            if (IsRecipeFormed(recipe))
             {
-                if (activeCard.cardID == reqCard) cardFound = true;
-            }
-            if (!cardFound) return; // Ada kartu yang kurang, batalkan!
-        }
-
-        // 2. Jika semua kartu lengkap, Cek Jaraknya (Proximity)
-        if (AreCardsCloseEnough())
-        {
-            missionAlreadyCompleted = true; // Kunci agar tidak terpanggil 2x
-            ExecuteSynthesis();
-        }
-    }
-
-    private bool AreCardsCloseEnough()
-    {
-        // Mengecek jarak antara kartu pertama dengan kartu-kartu lainnya
-        // Cocok untuk kombinasi 2 maupun 3 kartu sekaligus!
-        Vector3 centerPoint = cardsOnCamera[0].transform.position;
-
-        for (int i = 1; i < cardsOnCamera.Count; i++)
-        {
-            float distance = Vector3.Distance(centerPoint, cardsOnCamera[i].transform.position);
-            if (distance > proximityThreshold)
-            {
-                return false; // Ada kartu yang kejauhan!
+                ExecuteSynthesis(recipe);
+                break; // Hanya buat 1 objek per frame untuk mencegah lag
             }
         }
-        return true; // Semua kartu berdekatan!
     }
 
-    private void ExecuteSynthesis()
+    private bool IsRecipeFormed(CardRecipe recipe)
     {
-        Debug.Log("SINTESIS BERHASIL! Memunculkan 3D...");
+        List<ZicharaCard> cardsForThisRecipe = new List<ZicharaCard>();
 
-        // Cari titik tengah (Centroid) untuk memunculkan objek 3D Roti/Transportasi
+        // 1. Cek apakah kartu untuk resep ini ada di layar
+        foreach (string reqCard in recipe.requiredCards)
+        {
+            ZicharaCard foundCard = cardsOnCamera.Find(c => c.cardID == reqCard);
+            if (foundCard == null) return false; // Kurang kartu
+            
+            cardsForThisRecipe.Add(foundCard);
+        }
+
+        // 2. Cek jarak (HANYA antar kartu yang jadi bagian dari resep ini)
+        for (int i = 0; i < cardsForThisRecipe.Count; i++)
+        {
+            for (int j = i + 1; j < cardsForThisRecipe.Count; j++)
+            {
+                float dist = Vector3.Distance(cardsForThisRecipe[i].transform.position, cardsForThisRecipe[j].transform.position);
+                if (dist > proximityThreshold) return false;
+            }
+        }
+
+        return true; // Resep terbentuk!
+    }
+
+    private void ExecuteSynthesis(CardRecipe recipe)
+    {
+        // Cari titik tengah (Centroid) dari kartu-kartu yang spesifik membentuk resep ini
         Vector3 spawnPosition = Vector3.zero;
-        foreach (Card card in cardsOnCamera)
+        int cardCount = 0;
+        foreach (string reqCard in recipe.requiredCards)
         {
-            spawnPosition += card.transform.position;
+            ZicharaCard card = cardsOnCamera.Find(c => c.cardID == reqCard);
+            if (card != null)
+            {
+                spawnPosition += card.transform.position;
+                cardCount++;
+            }
         }
-        spawnPosition /= cardsOnCamera.Count;
+        spawnPosition /= cardCount;
 
-        // Munculkan Objek 3D Roti/Jam Tangan dll di titik tengah kartu
-        if (currentActiveMission.resultPrefab != null)
+        // Munculkan 3D
+        if (recipe.resultPrefab != null)
         {
-            Instantiate(currentActiveMission.resultPrefab, spawnPosition, Quaternion.identity);
+            GameObject newObj = Instantiate(recipe.resultPrefab, spawnPosition, Quaternion.identity);
+            active3DObjects.Add(newObj); // Simpan ke memori untuk di-cleanup nanti
         }
 
-        // --- UPDATE DATA & UI ---
-        // Panggil GameManager untuk save JSON
-        GameManager.Instance.CompleteMission(currentActiveMission.missionID, currentActiveMission.resultPrefab?.name);
+        completedRecipesInMission.Add(recipe.recipeName);
+        OnItemDiscovered?.Invoke(recipe.recipeName); // Kasih tau UI buat nyoret checklist
+
+        // Cek Kondisi Menang
+        CheckMissionCompletion();
+    }
+
+    private void CheckMissionCompletion()
+    {
+        if (currentMission.completionRule == MissionCompletionRule.RequireAnyRecipe)
+        {
+            isMissionFinished = true; // Cukup 1 resep jadi, misi sukses (Contoh: Sepeda ATAU Kereta)
+        }
+        else if (currentMission.completionRule == MissionCompletionRule.RequireAllRecipes)
+        {
+            // Sukses jika jumlah resep yang dibuat == jumlah resep yang diminta
+            if (completedRecipesInMission.Count >= currentMission.recipes.Count)
+            {
+                isMissionFinished = true; 
+            }
+        }
+
+        if (isMissionFinished)
+        {
+            GameManager.Instance.CompleteMission(currentMission.missionID, "");
+            OnMissionSuccess?.Invoke(currentMission);
+        }
+    }
+
+    // --- FUNGSI UNTUK PINDAH MISI (Dipanggil oleh Tombol Lanjut teman UI-mu) ---
+    public void LoadNextMissionInQueue()
+    {
+        // 1. CLEANUP: Hapus semua objek 3D dari misi sebelumnya biar layar bersih
+        foreach (GameObject obj in active3DObjects) Destroy(obj);
+        active3DObjects.Clear();
+        completedRecipesInMission.Clear();
+        cardsOnCamera.Clear(); // Bersihkan ingatan kamera
+
+        // 2. Maju ke misi berikutnya
+        currentMissionIndex++;
+        if (currentMissionIndex < levelMissions.Count)
+        {
+            LoadMission(currentMissionIndex);
+        }
+        else
+        {
+            Debug.Log("SEMUA MISI DI LEVEL INI SELESAI!");
+            GameManager.Instance.UnlockNextLevel(2); // Buka level 2 di JSON
+            // Panggil event UI untuk pindah layar ke Level Selection
+        }
+    }
+
+    private void LoadMission(int index)
+    {
+        currentMission = levelMissions[index];
+        isMissionFinished = false;
         
-        // Panggil UIManager untuk coret Checklist dan munculkan PopUp Berhasil!
-        UIManager.Instance.UpdateChecklist("Cari " + currentActiveMission.missionTitle, true);
-        UIManager.Instance.ShowPopup("Berhasil!", currentActiveMission.endStoryText);
+        // Panggil UI temanmu untuk memunculkan popup cerita awal
+        OnMissionStarted?.Invoke(currentMission); 
     }
 }
