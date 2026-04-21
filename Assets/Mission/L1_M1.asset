@@ -12,13 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0696ef6326f221429bdf0ffe974afad, type: 3}
   m_Name: L1_M1
   m_EditorClassIdentifier: Assembly-CSharp::MissionData
-  missionID: Misi_Bekal_01
-  missionTitle: Bekal Chi-Chi
-  requiredCards:
-  - Mian
-  - Bao
-  resultPrefab: {fileID: 919132149155446097, guid: 109315af1f8fa7d4ab3e9022fdf33287, type: 3}
-  startStoryText: Sebelum pergi ke stasiun, aku ingin membawa bekal sarapan agar
-    aku tidak kelaparan nanti. Roti merupakan pilihan yang bagus! Aku akan memasukkan
-    Roti ke tas sekolahku untuk bekal sarapan hari ini"""
-  endStoryText: Hore! Bekal sudah aman. Sekarang kita siap berangkat!
+  missionID: L1_M1_Bekal
+  missionTitle: 'Misi 1: Bekal Sarapan'
+  completionRule: 0
+  recipes:
+  - recipeName: Roti
+    requiredCards:
+    - Mian
+    - Bao
+    resultPrefab: {fileID: 919132149155446097, guid: f374b0beb0df242538300ea385588a78, type: 3}
+  startStoryText: bhap
+  endStoryText: voomb
