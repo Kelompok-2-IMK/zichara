@@ -28,9 +28,9 @@ public class MainMenuManager : MonoBehaviour
         SceneManager.LoadScene("freeplay");
     }
 
-    public void GoToScan()
+    public void GoToScanLevel1()
     {
-        SceneManager.LoadScene("Scan");
+        SceneManager.LoadScene("Scan_Story1");
     }
 
     public void GoToScanLevel2()
