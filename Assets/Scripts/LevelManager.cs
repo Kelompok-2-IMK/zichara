@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement; // Tambahan wajib untuk pindah scene
 
 public class LevelManager : MonoBehaviour
 {
@@ -9,22 +10,18 @@ public class LevelManager : MonoBehaviour
 
     void Start()
     {
-        // --- TAMBAHKAN DI SINI ---
-        // Jika game baru pertama kali dijalankan (belum ada data tersimpan),
-        // anggap level 1 sudah selesai sehingga level 2 otomatis terbuka.
+        // FIX 1: Ubah ke 1. Pemain baru harus mulai dari Level 1 yang terbuka, sisanya terkunci.
         if (!PlayerPrefs.HasKey("LastClearedLevel")) 
         {
-            PlayerPrefs.SetInt("LastClearedLevel", 2);
-            PlayerPrefs.Save(); // Simpan perubahan ke memori perangkat
+            PlayerPrefs.SetInt("LastClearedLevel", 1);
+            PlayerPrefs.Save(); 
         }
-        // -------------------------
 
         RefreshLevelStatus();
     }
 
     public void RefreshLevelStatus()
     {
-        // Mengambil data level mana yang boleh diakses
         int lastClearedLevel = PlayerPrefs.GetInt("LastClearedLevel", 1);
 
         for (int i = 0; i < levelButtons.Length; i++)
@@ -44,14 +41,14 @@ public class LevelManager : MonoBehaviour
 
     void LockLevel(Button btn)
     {
-        btn.interactable = false; // Tidak bisa diklik
+        btn.interactable = false; 
         SetButtonOpacity(btn, lockedOpacity);
     }
 
     void UnlockLevel(Button btn)
     {
-        btn.interactable = true; // Bisa diklik
-        SetButtonOpacity(btn, 1.0f); // Opacity penuh
+        btn.interactable = true; 
+        SetButtonOpacity(btn, 1.0f); 
     }
 
     void SetButtonOpacity(Button btn, float alpha)
@@ -62,16 +59,28 @@ public class LevelManager : MonoBehaviour
         cg.alpha = alpha;
     }
 
-    // Panggil fungsi ini saat menekan tombol "Lanjut" di popup finish level 2
+    // Panggil fungsi ini saat menekan tombol "Lanjut" di popup cerita TERAKHIR di suatu level
     public void CompleteLevel(int levelIndex)
     {
         int currentReached = PlayerPrefs.GetInt("LastClearedLevel", 1);
         
-        // Simpan hanya jika level yang diselesaikan lebih tinggi dari rekor sebelumnya
         if (levelIndex >= currentReached)
         {
             PlayerPrefs.SetInt("LastClearedLevel", levelIndex + 1);
             PlayerPrefs.Save();
         }
+    }
+
+    // FIX 2: Fungsi baru yang akan dipanggil saat pemain MENGKLIK tombol Level 1, 2, atau 3
+    public void LoadLevel(int levelToLoad)
+    {
+        Debug.Log("Memuat Level: " + levelToLoad);
+        
+        // Simpan niat pemain ingin main level berapa
+        PlayerPrefs.SetInt("TargetLevelToPlay", levelToLoad);
+        PlayerPrefs.Save();
+
+        // Pindah ke scene AR utama kamu (Pastikan nama scenenya benar, misal "ScanScene")
+        SceneManager.LoadScene("ScanScene"); 
     }
 }
