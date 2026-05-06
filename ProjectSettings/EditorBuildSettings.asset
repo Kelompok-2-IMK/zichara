@@ -11,7 +11,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/modeSelection.unity
     guid: 6eb02fa7b611a434ba2efdc56430ea0a
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Dev.unity
     guid: 016874f42ba5448cd8c5a541c6832ca0
   - enabled: 0
@@ -38,6 +38,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Scan_Story2.unity
     guid: 868f9eb49afbc49d0b3b574b6b2b8bd5
+  - enabled: 1
+    path: Assets/Scenes/Scan_Story3.unity
+    guid: e93d0e8ec998dfa4e8a33ab6d41475e8
   m_configObjects:
     UnityEditor.XR.ARCore.ARCoreSettings: {fileID: 11400000, guid: 74919ca663b2f47a38d319a806ac3126, type: 2}
     UnityEditor.XR.ARKit.ARKitSettings: {fileID: 11400000, guid: 3791599672815448888bacacdf4c567e, type: 2}
