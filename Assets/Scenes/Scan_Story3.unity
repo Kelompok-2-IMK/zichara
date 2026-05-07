@@ -5168,7 +5168,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CardSynthesisManager
   levelMissions:
   - {fileID: 11400000, guid: 381b1c224de9ef14fac9042ab93db06b, type: 2}
-  proximityThreshold: 1
+  proximityThreshold: 2
   currentMission: {fileID: 11400000, guid: 381b1c224de9ef14fac9042ab93db06b, type: 2}
   cardsOnCamera: []
 --- !u!1 &2033876291

@@ -20,11 +20,11 @@ MonoBehaviour:
     requiredCards:
     - Mian
     - Bao
-    resultPrefab: {fileID: 919132149155446097, guid: 109315af1f8fa7d4ab3e9022fdf33287, type: 3}
+    resultPrefab: {fileID: 919132149155446097, guid: 158538fd785cb354081db6700e10c7c6, type: 3}
   - recipeName: Tas Sekolah
     requiredCards:
     - Shu
     - Bao
-    resultPrefab: {fileID: 919132149155446097, guid: 47ec99c1ee30da145853e7b01b17840d, type: 3}
+    resultPrefab: {fileID: 919132149155446097, guid: f0f5c177bd979294d81b7b86c41a4734, type: 3}
   startStoryText: bhap
   endStoryText: voomb
