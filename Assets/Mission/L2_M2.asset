@@ -20,11 +20,11 @@ MonoBehaviour:
     requiredCards:
     - Huo
     - Che
-    resultPrefab: {fileID: 919132149155446097, guid: 0e89710f3aa674643a076e4df506c63a, type: 3}
+    resultPrefab: {fileID: 919132149155446097, guid: 238aeabfb84a8c145b0421ec005281d1, type: 3}
   - recipeName: Trem
     requiredCards:
     - Dian
     - Che
-    resultPrefab: {fileID: 919132149155446097, guid: 55d3d46723e720349b4398aac88f5316, type: 3}
+    resultPrefab: {fileID: 919132149155446097, guid: 776f7ffdb73386048bffa6d740a8ab22, type: 3}
   startStoryText: anuannya
   endStoryText: anu

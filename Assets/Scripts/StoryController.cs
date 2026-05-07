@@ -1,58 +1,63 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class StoryController : MonoBehaviour
 {
     [Header("UI Status Per Misi")]
-    public GameObject status1; // Taruh object 'status1' dari Hierarchy ke sini
-    public GameObject status2; // Taruh object 'status2' dari Hierarchy ke sini
+    public GameObject status1;
+    public GameObject status2;
 
-    [Header("Daftar Popup Story")]
-    public GameObject[] popups; 
-    
+    [Header("Daftar Popup Story (urut sesuai array)")]
+    public GameObject[] popups;
+
     private int currentIndex = 0;
     private int currentMissionStartBound = 0;
-    private int currentMissionEndBound = 1; // Default misi 1 (index 0-1)
+    private int currentMissionEndBound = 0;
 
-    void Start()
+    private void Start()
     {
-        // Awal game, set ke misi 1
-        SetupMissionUI(1);
+        CloseAllPopups();
     }
 
-    // Fungsi untuk ganti set popup & status bar
     public void SetupMissionUI(int missionNumber)
     {
         CloseAllPopups();
-        
+
+        string sceneName = SceneManager.GetActiveScene().name;
+        bool isLevel3 = sceneName == "Scan_Story3";
+
         if (missionNumber == 1)
         {
-            status1.SetActive(true);
-            status2.SetActive(false);
-            currentMissionStartBound = 0; // popup 2.1.1
-            currentMissionEndBound = 1;   // popup 2.1.2
+            if (status1 != null) status1.SetActive(true);
+            if (status2 != null) status2.SetActive(false);
+            currentMissionStartBound = 0;
+            currentMissionEndBound = 1;
         }
         else if (missionNumber == 2)
         {
-            status1.SetActive(false);
-            status2.SetActive(true);
-            currentMissionStartBound = 2; // popup 2.2.1
-            currentMissionEndBound = 3;   // popup 2.2.2
+            if (status1 != null) status1.SetActive(false);
+            if (status2 != null) status2.SetActive(true);
+            currentMissionStartBound = 2;
+            currentMissionEndBound = 3;
         }
-        else if (missionNumber == 3) 
+        else if (missionNumber == 99) // finish
         {
-            status1.SetActive(false);
-            status2.SetActive(false);
-            // Misal popupStory2.finish ada di index ke-4 dalam array popups
-            currentMissionStartBound = 4; 
-            currentMissionEndBound = 4;   
+            if (status1 != null) status1.SetActive(false);
+            if (status2 != null) status2.SetActive(false);
+
+            // Level 3 hanya punya 3 popup (0,1,2), finish di index 2
+            // Level lain punya 5 popup (0,1,2,3,4), finish di index 4
+            int finishIndex = isLevel3 ? 2 : 4;
+            currentMissionStartBound = finishIndex;
+            currentMissionEndBound = finishIndex;
         }
+
         currentIndex = currentMissionStartBound;
         ShowPopup(currentIndex);
     }
 
     public void NextStory()
     {
-        // Batasi supaya Next tidak kebablasan ke misi selanjutnya sebelum waktunya
         if (currentIndex < currentMissionEndBound)
         {
             currentIndex++;
@@ -66,7 +71,6 @@ public class StoryController : MonoBehaviour
 
     public void PrevStory()
     {
-        // Batasi supaya tidak balik ke popup misi sebelumnya
         if (currentIndex > currentMissionStartBound)
         {
             currentIndex--;
@@ -74,10 +78,32 @@ public class StoryController : MonoBehaviour
         }
     }
 
-    // Fungsi-fungsi lain (CloseAllPopups, ShowPopup) tetap sama seperti sebelumnya
-    public void CloseAllPopups() { foreach (GameObject p in popups) p.SetActive(false); }
-    private void ShowPopup(int index) { CloseAllPopups(); popups[index].SetActive(true); }
-    
-    // Fungsi untuk tombol "Cerita" agar munculin popup misi yang sekarang saja
-    public void OpenStory() { currentIndex = currentMissionStartBound; ShowPopup(currentIndex); }
+    public void CloseAllPopups()
+    {
+        if (popups == null) return;
+        foreach (GameObject p in popups)
+            if (p != null) p.SetActive(false);
+    }
+
+    private void ShowPopup(int index)
+    {
+        if (popups == null || popups.Length == 0)
+        {
+            Debug.LogError("Popups array kosong!");
+            return;
+        }
+        if (index < 0 || index >= popups.Length)
+        {
+            Debug.LogError($"ShowPopup index {index} out of range! Max: {popups.Length - 1}");
+            return;
+        }
+        CloseAllPopups();
+        popups[index].SetActive(true);
+    }
+
+    public void OpenStory()
+    {
+        currentIndex = currentMissionStartBound;
+        ShowPopup(currentIndex);
+    }
 }
