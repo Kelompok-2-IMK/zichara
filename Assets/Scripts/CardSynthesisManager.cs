@@ -1,27 +1,41 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 using IEnumerator = System.Collections.IEnumerator;
 
 public class CardSynthesisManager : MonoBehaviour
 {
     public static CardSynthesisManager Instance { get; private set; }
 
-    [Header("Antrean Level 1")]
-    public List<MissionData> levelMissions; 
+    [Header("Misi di Level Ini")]
+    public List<MissionData> levelMissions;
     public float proximityThreshold = 2.0f;
 
     [Header("Debug Status")]
     public MissionData currentMission;
     public List<ZicharaCard> cardsOnCamera = new List<ZicharaCard>();
-    
+
     private int currentMissionIndex = 0;
     private bool isMissionFinished = false;
     private bool isWaitingForNextMission = false;
     private List<string> completedRecipesInMission = new List<string>();
-    
-    // Kita simpan objek yang aktif di sini
     private Dictionary<string, GameObject> activeSynthesisObjects = new Dictionary<string, GameObject>();
+
+    // Nama scene ini, untuk key PlayerPrefs
+    private string MissionKey => "CurrentMission_" + SceneManager.GetActiveScene().name;
+
+    // Nomor level berdasarkan nama scene (Scan_Story1 → 1, dst)
+    private int CurrentLevelNumber
+    {
+        get
+        {
+            string name = SceneManager.GetActiveScene().name;
+            // Ambil angka terakhir dari nama scene
+            if (name.Length > 0 && char.IsDigit(name[name.Length - 1]))
+                return int.Parse(name[name.Length - 1].ToString());
+            return 1;
+        }
+    }
 
     private void Awake()
     {
@@ -31,10 +45,18 @@ public class CardSynthesisManager : MonoBehaviour
 
     private void Start()
     {
-        if (levelMissions.Count > 0) LoadMission(0);
+        ValidateMissions();
+
+        if (levelMissions.Count > 0)
+        {
+            int savedIndex = PlayerPrefs.GetInt(MissionKey, 0);
+            if (savedIndex >= levelMissions.Count) savedIndex = 0;
+            LoadMission(savedIndex);
+        }
     }
 
-    // Fungsi ini dipanggil otomatis oleh ZicharaCard
+    // ── Kartu masuk/keluar kamera ──────────────────────────────────────────
+
     public void AddActiveCard(ZicharaCard card)
     {
         if (!cardsOnCamera.Contains(card))
@@ -44,7 +66,6 @@ public class CardSynthesisManager : MonoBehaviour
         }
     }
 
-    // Fungsi ini dipanggil otomatis oleh ZicharaCard
     public void RemoveActiveCard(ZicharaCard card)
     {
         if (cardsOnCamera.Contains(card))
@@ -54,10 +75,11 @@ public class CardSynthesisManager : MonoBehaviour
         }
     }
 
+    // ── Update loop ────────────────────────────────────────────────────────
+
     private void Update()
     {
         if (currentMission == null || isMissionFinished) return;
-        
         CheckRecipes();
         UpdateObjectPositions();
     }
@@ -66,54 +88,49 @@ public class CardSynthesisManager : MonoBehaviour
     {
         foreach (CardRecipe recipe in currentMission.recipes)
         {
+            if (recipe == null || recipe.resultPrefab == null) continue;
+
             bool formed = IsRecipeFormed(recipe);
             bool isSpawned = activeSynthesisObjects.ContainsKey(recipe.recipeName);
 
-            // LOGIKA COMBO: Jika kartu lengkap & jarak dekat, tapi belum ada barangnya
             if (formed && !isSpawned)
-            {
                 SpawnSynthesis(recipe);
-            }
-            // LOGIKA HILANG: Jika kartu tidak lengkap/jauh, tapi barangnya masih ada
             else if (!formed && isSpawned)
-            {
                 RemoveSynthesis(recipe.recipeName);
-            }
         }
     }
 
     private bool IsRecipeFormed(CardRecipe recipe)
     {
-        List<ZicharaCard> foundCardsForRecipe = new List<ZicharaCard>();
+        List<ZicharaCard> found = new List<ZicharaCard>();
 
-        // 1. Cek keberadaan semua kartu yang dibutuhkan
         foreach (string id in recipe.requiredCards)
         {
             ZicharaCard c = cardsOnCamera.Find(card => card.cardID == id);
-            if (c == null) return false; // Ada satu kartu yang nggak kelihatan
-            foundCardsForRecipe.Add(c);
+            if (c == null) return false;
+            found.Add(c);
         }
 
-        // 2. Cek jarak antar kartu (Proximity)
-        for (int i = 0; i < foundCardsForRecipe.Count; i++)
-        {
-            for (int j = i + 1; j < foundCardsForRecipe.Count; j++)
-            {
-                if (Vector3.Distance(foundCardsForRecipe[i].transform.position, foundCardsForRecipe[j].transform.position) > proximityThreshold)
-                    return false; // Kartunya kejauhan
-            }
-        }
+        for (int i = 0; i < found.Count; i++)
+            for (int j = i + 1; j < found.Count; j++)
+                if (Vector3.Distance(found[i].transform.position, found[j].transform.position) > proximityThreshold)
+                    return false;
 
         return true;
     }
 
     private void SpawnSynthesis(CardRecipe recipe)
     {
+        if (recipe.resultPrefab == null)
+        {
+            Debug.LogError($"resultPrefab NULL untuk resep '{recipe.recipeName}'!");
+            return;
+        }
+
         Vector3 pos = CalculateCentroid(recipe.requiredCards);
         GameObject obj = Instantiate(recipe.resultPrefab, pos, Quaternion.identity);
         activeSynthesisObjects.Add(recipe.recipeName, obj);
 
-        // Tandai misi selesai jika perlu
         if (!completedRecipesInMission.Contains(recipe.recipeName))
         {
             completedRecipesInMission.Add(recipe.recipeName);
@@ -123,15 +140,10 @@ public class CardSynthesisManager : MonoBehaviour
 
     private void RemoveSynthesis(string recipeName)
     {
-        if (activeSynthesisObjects.ContainsKey(recipeName))
+        if (activeSynthesisObjects.TryGetValue(recipeName, out GameObject obj))
         {
-            GameObject objToRemove = activeSynthesisObjects[recipeName];
-            if (objToRemove != null)
-            {
-                Destroy(objToRemove);
-            }
+            if (obj != null) Destroy(obj);
             activeSynthesisObjects.Remove(recipeName);
-            Debug.Log("Menghapus objek: " + recipeName);
         }
     }
 
@@ -139,26 +151,14 @@ public class CardSynthesisManager : MonoBehaviour
     {
         foreach (var entry in activeSynthesisObjects)
         {
-            string rName = entry.Key;
-            GameObject obj = entry.Value;
+            CardRecipe recipe = currentMission.recipes.Find(r => r.recipeName == entry.Key);
+            if (recipe == null || entry.Value == null) continue;
 
-            // Cari data resep yang sesuai dengan objek yang sedang aktif ini
-            CardRecipe recipe = currentMission.recipes.Find(r => r.recipeName == rName);
-            
-            if (recipe != null && obj != null)
-            {
-                // 1. Update posisi ke tengah-tengah kartu yang KHUSUS dibutuhkan resep ini
-                obj.transform.position = CalculateCentroid(recipe.requiredCards);
+            entry.Value.transform.position = CalculateCentroid(recipe.requiredCards);
 
-                // 2. Update rotasi agar mengikuti kartu PERTAMA dari resep tersebut
-                // Jangan pakai cardsOnCamera[0], tapi cari kartu dari list requiredCards-nya
-                ZicharaCard referenceCard = cardsOnCamera.Find(c => c.cardID == recipe.requiredCards[0]);
-                
-                if (referenceCard != null)
-                {
-                    obj.transform.rotation = referenceCard.transform.rotation;
-                }
-            }
+            ZicharaCard refCard = cardsOnCamera.Find(c => c.cardID == recipe.requiredCards[0]);
+            if (refCard != null)
+                entry.Value.transform.rotation = refCard.transform.rotation;
         }
     }
 
@@ -169,31 +169,27 @@ public class CardSynthesisManager : MonoBehaviour
         foreach (string id in reqCards)
         {
             ZicharaCard c = cardsOnCamera.Find(card => card.cardID == id);
-            if (c != null)
-            {
-                sum += c.transform.position;
-                count++;
-            }
+            if (c != null) { sum += c.transform.position; count++; }
         }
         return count > 0 ? sum / count : Vector3.zero;
     }
 
+    // ── Misi selesai ───────────────────────────────────────────────────────
+
     private void CheckMissionCompletion()
     {
-        // Cek apakah semua resep selesai DAN pastikan kita tidak sedang dalam masa tunggu delay
         if (completedRecipesInMission.Count >= currentMission.recipes.Count && !isWaitingForNextMission)
         {
-            isWaitingForNextMission = true; // Kunci agar tidak terpanggil dua kali
-            Debug.Log("Misi " + currentMission.name + " Selesai! Menunggu 5 detik...");
-            StartCoroutine(WaitAndLoadNextMission(5f)); 
+            isWaitingForNextMission = true;
+            Debug.Log($"Misi {currentMission.name} Selesai! Menunggu 5 detik...");
+            StartCoroutine(WaitAndLoadNextMission(5f));
         }
     }
 
     private IEnumerator WaitAndLoadNextMission(float delay)
     {
         yield return new WaitForSeconds(delay);
-        
-        isWaitingForNextMission = false; // Reset pengaman
+        isWaitingForNextMission = false;
         LoadNextMissionInQueue();
     }
 
@@ -207,52 +203,73 @@ public class CardSynthesisManager : MonoBehaviour
         }
         else
         {
-            // SEMUA MISI SELESAI
+            // Semua misi di level ini selesai
             isMissionFinished = true;
-            Debug.Log("SEMUA MISI DI LEVEL INI BERHASIL!");
+            Debug.Log("SEMUA MISI LEVEL INI SELESAI!");
 
-            // Panggil StoryController untuk nampilin popup finish
-            StoryController story = FindFirstObjectByType<StoryController>();
-            if(story != null)
+            // Unlock level berikutnya
+            int thisLevel = CurrentLevelNumber;
+            int lastCleared = PlayerPrefs.GetInt("LastClearedLevel", 1);
+            if (thisLevel >= lastCleared)
             {
-                story.SetupMissionUI(3); // Angka 3 untuk memicu kondisi finish
+                PlayerPrefs.SetInt("LastClearedLevel", thisLevel + 1);
             }
+
+            // Reset progress misi level ini (kalau dimainin ulang mulai dari misi 1)
+            PlayerPrefs.SetInt(MissionKey, 0);
+            PlayerPrefs.Save();
+
+            // Tampilkan popup finish via StoryController
+            StoryController story = FindFirstObjectByType<StoryController>();
+            if (story != null) story.SetupMissionUI(99); // 99 = kode "finish"
         }
     }
 
+    // ── Load misi ─────────────────────────────────────────────────────────
+
     private void LoadMission(int index)
     {
-        // --- TAMBAHAN WAJIB: Hancurkan semua objek yang sedang aktif ---
         foreach (var entry in activeSynthesisObjects)
-        {
-            if (entry.Value != null) 
-            {
-                Destroy(entry.Value);
-            }
-        }
-        activeSynthesisObjects.Clear(); 
-        // --------------------------------------------------------------
+            if (entry.Value != null) Destroy(entry.Value);
+        activeSynthesisObjects.Clear();
 
         currentMission = levelMissions[index];
         currentMissionIndex = index;
         completedRecipesInMission.Clear();
-        
-        StoryController story = FindFirstObjectByType<StoryController>();
-        if(story != null)
-        {
-            story.SetupMissionUI(index + 1);
-        }
 
-        Debug.Log("Memulai Misi: " + currentMission.name);
+        // Simpan progress
+        PlayerPrefs.SetInt(MissionKey, index);
+        PlayerPrefs.Save();
+
+        StoryController story = FindFirstObjectByType<StoryController>();
+        if (story != null) story.SetupMissionUI(index + 1);
+
+        Debug.Log($"Memulai Misi [{index}]: {currentMission.name}");
     }
 
-    public void OnFinishLevel2()
+    // ── Tombol "Kembali ke Level Selection" (dipanggil dari popup finish) ──
+
+    public void GoToLevelSelection()
     {
-        // Simpan bahwa level 2 sudah selesai (berarti level 3 sekarang terbuka)
-        PlayerPrefs.SetInt("LastClearedLevel", 3);
-        PlayerPrefs.Save();
-        
-        // Pindah ke scene level selection
-        UnityEngine.SceneManagement.SceneManager.LoadScene("Level");
+        SceneManager.LoadScene("LevelSelection");
+    }
+
+    // ── Validasi di Start ─────────────────────────────────────────────────
+
+    private void ValidateMissions()
+    {
+        for (int i = 0; i < levelMissions.Count; i++)
+        {
+            if (levelMissions[i] == null)
+            {
+                Debug.LogError($"levelMissions[{i}] is NULL!");
+                continue;
+            }
+            foreach (CardRecipe recipe in levelMissions[i].recipes)
+            {
+                if (recipe.resultPrefab == null)
+                    Debug.LogError($"Mission '{levelMissions[i].name}' → Recipe '{recipe.recipeName}' has no resultPrefab!");
+            }
+        }
     }
 }

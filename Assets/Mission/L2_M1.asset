@@ -20,11 +20,11 @@ MonoBehaviour:
     requiredCards:
     - Dian
     - Hua
-    resultPrefab: {fileID: 919132149155446097, guid: 320e9a813ba760c4283d68ef33286abb, type: 3}
+    resultPrefab: {fileID: 919132149155446097, guid: b75b31b6f83235640a1c43161d99fabb, type: 3}
   - recipeName: Handphone
     requiredCards:
     - Shou
     - Ji
-    resultPrefab: {fileID: 919132149155446097, guid: 76955c50ef100874eaa54a378be46c4f, type: 3}
+    resultPrefab: {fileID: 919132149155446097, guid: b22bf208f2bfbc14da7e7ea729d5c02c, type: 3}
   startStoryText: anuannya
   endStoryText: anu

@@ -20,16 +20,16 @@ MonoBehaviour:
     requiredCards:
     - Shu
     - Jia
-    resultPrefab: {fileID: 919132149155446097, guid: 799ea3c147beffa47ba4c3770799aa4e, type: 3}
+    resultPrefab: {fileID: 919132149155446097, guid: b8a9ddb932c598749b74b864e591b3e2, type: 3}
   - recipeName: Gelas Air
     requiredCards:
     - Shui
     - Bei
-    resultPrefab: {fileID: 919132149155446097, guid: 41e676a66b6aec848a8986fd61c54c2b, type: 3}
+    resultPrefab: {fileID: 919132149155446097, guid: 10f1cd3fc1051e34fa997d29d3b737c0, type: 3}
   - recipeName: Jam Tangan
     requiredCards:
     - Shou
     - Biao
-    resultPrefab: {fileID: 919132149155446097, guid: 958d86d25c905754f9e91a2b0a3feca8, type: 3}
+    resultPrefab: {fileID: 919132149155446097, guid: a3102023d8f6d4549aee703958c1bcdf, type: 3}
   startStoryText: 
   endStoryText: 
