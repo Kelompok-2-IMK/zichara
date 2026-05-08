@@ -20,12 +20,12 @@ MonoBehaviour:
     requiredCards:
     - Ma
     - Che
-    resultPrefab: {fileID: 919132149155446097, guid: a14e5739af8e1b548a581e75c75c4b16, type: 3}
+    resultPrefab: {fileID: 919132149155446097, guid: 2df8c3206cbe04e239a5726447fd48f4, type: 3}
   - recipeName: Sepeda
     requiredCards:
     - Zi
     - Xing
     - Che
-    resultPrefab: {fileID: 919132149155446097, guid: a96f79ca8327fcc44a36cce47477fb87, type: 3}
+    resultPrefab: {fileID: 919132149155446097, guid: beeb552169f6d46c2bbf9cf2fa63b9f5, type: 3}
   startStoryText: bhap
   endStoryText: voomb

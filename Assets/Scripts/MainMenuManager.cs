@@ -38,6 +38,16 @@ public class MainMenuManager : MonoBehaviour
         SceneManager.LoadScene("Scan_Story2");
     }
 
+    public void GoToScanLevel3()
+    {
+        SceneManager.LoadScene("Scan_Story3");
+    }
+
+    public void GoToScanLevel4()
+    {
+        SceneManager.LoadScene("Scan_Story4");
+    }
+
     public void GoToLevel()
     {
         SceneManager.LoadScene("Level");
