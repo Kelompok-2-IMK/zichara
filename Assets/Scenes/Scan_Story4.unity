@@ -985,9 +985,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '"Di stasiun ini terdapat 2 jenis kereta yang beroperasi yaitu, kereta
-    api dan kereta listrik. Bantu aku menentukan jenis kereta mana yang akan aku
-    naiki hari ini"'
+  m_text: '"Sampai jumpa lagi. Chichi harap kita dapat bertemu lagi"'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: cdb1c4b22e1f34a78806ba411c9e9428, type: 2}
   m_sharedMaterial: {fileID: 4592470606714452625, guid: cdb1c4b22e1f34a78806ba411c9e9428, type: 2}
@@ -2160,7 +2158,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Story 2
+  m_text: Done!
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f84b8b40be8e04fc2baff0c187ec85e1, type: 2}
   m_sharedMaterial: {fileID: -5624424111914289484, guid: f84b8b40be8e04fc2baff0c187ec85e1, type: 2}
@@ -5090,8 +5088,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '"Hore! Chichi sudah berhasil menentukan keretanya. Ayo kita beli tiket
-    dan berangkat"'
+  m_text: '"Terima kasih telah membantu Chichi untuk sampai di Rumah Nenek."'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: cdb1c4b22e1f34a78806ba411c9e9428, type: 2}
   m_sharedMaterial: {fileID: 4592470606714452625, guid: cdb1c4b22e1f34a78806ba411c9e9428, type: 2}
@@ -7200,7 +7197,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Story 2
+  m_text: Done !
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f84b8b40be8e04fc2baff0c187ec85e1, type: 2}
   m_sharedMaterial: {fileID: -5624424111914289484, guid: f84b8b40be8e04fc2baff0c187ec85e1, type: 2}
