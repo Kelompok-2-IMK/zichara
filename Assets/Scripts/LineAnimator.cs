@@ -1,50 +1,60 @@
 using UnityEngine;
 using System.Collections;
 
-public class LineSequenceAnimator : MonoBehaviour
+public class LineAnimator : MonoBehaviour
 {
-    [SerializeField] private float animationDuration = 2f;
-    public LineRenderer line1;
-    public LineRenderer line2;
+    [SerializeField] private float animationDuration = 0.5f;
 
-    private void Start()
+    private LineRenderer lineRenderer;
+    private Vector3[]    linePoints;
+    private int          pointCount;
+
+    public float GetDuration() => animationDuration;
+
+    // Ganti private void Start() jadi ini:
+    public void PlayStroke()
     {
-        // Di awal, pastikan semua line mati dulu
-        if (line1 != null) line1.gameObject.SetActive(false);
-        if (line2 != null) line2.gameObject.SetActive(false);
+        // Pastikan kita ambil referensi dulu kalau belum ada
+        if (lineRenderer == null) {
+            lineRenderer = GetComponent<LineRenderer>();
+            pointCount   = lineRenderer.positionCount;
+            linePoints   = new Vector3[pointCount];
 
-        StartCoroutine(PlaySequence());
+            for (int i = 0; i < pointCount; i++)
+                linePoints[i] = lineRenderer.GetPosition(i);
+        }
+
+        StopAllCoroutines(); // Biar gak tumpang tindih kalau loop
+        StartCoroutine(AnimateLine());
     }
 
-    private IEnumerator PlaySequence()
+    private IEnumerator AnimateLine()
     {
-        // 1. Munculkan dan jalankan Line 1
-        if (line1 != null)
-        {
-            line1.gameObject.SetActive(true); // NYALAKAN LINE 1
-            yield return StartCoroutine(AnimateSingleLine(line1));
-        }
+        // Collapse all points to the start
+        for (int j = 1; j < pointCount; j++)
+            lineRenderer.SetPosition(j, linePoints[0]);
 
-        // 2. Munculkan dan jalankan Line 2 SETELAH Line 1 selesai
-        if (line2 != null)
-        {
-            line2.gameObject.SetActive(true); // NYALAKAN LINE 2
-            yield return StartCoroutine(AnimateSingleLine(line2));
-        }
-    }
+        float segmentDuration = animationDuration / (pointCount - 1);
 
-    private IEnumerator AnimateSingleLine(LineRenderer lr)
-    {
-        Vector3 startPos = lr.GetPosition(0);
-        Vector3 finalTarget = lr.GetPosition(1);
-
-        float t = 0;
-        while (t < 1.0f)
+        for (int i = 0; i < pointCount - 1; i++)
         {
-            t += Time.deltaTime / animationDuration;
-            lr.SetPosition(1, Vector3.Lerp(startPos, finalTarget, t));
-            yield return null;
+            float   elapsed  = 0f;
+            Vector3 startPos = linePoints[i];
+            Vector3 endPos   = linePoints[i + 1];
+
+            while (elapsed < segmentDuration)
+            {
+                elapsed += Time.deltaTime;
+                float   t   = Mathf.Clamp01(elapsed / segmentDuration);
+                Vector3 tip = Vector3.Lerp(startPos, endPos, t);
+
+                for (int j = i + 1; j < pointCount; j++)
+                    lineRenderer.SetPosition(j, tip);
+
+                yield return null;
+            }
+
+            lineRenderer.SetPosition(i + 1, endPos);
         }
-        lr.SetPosition(1, finalTarget);
     }
 }
