@@ -10,21 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a0696ef6326f221429bdf0ffe974afad, type: 3}
-  m_Name: L2_M1
+  m_Name: L4_M2
   m_EditorClassIdentifier: Assembly-CSharp::MissionData
-  missionID: L2_M1_Handphone
-  missionTitle: 'Misi 1: Handphone'
+  missionID: L1_M2_Kendaraan
+  missionTitle: 'Misi 2: Kendaraan'
   completionRule: 0
   recipes:
-  - recipeName: Telepon
+  - recipeName: Televisi
     requiredCards:
     - Dian
-    - Hua
-    resultPrefab: {fileID: 919132149155446097, guid: f7ebc9efc5b824083a3d8010bcb633c5, type: 3}
-  - recipeName: Handphone
+    - Shi
+    resultPrefab: {fileID: 919132149155446097, guid: d62412ad1b8bc4baeb7f276b74034c10, type: 3}
+  - recipeName: Komputer
     requiredCards:
-    - Shou
-    - Ji
-    resultPrefab: {fileID: 919132149155446097, guid: 7df3b2102002342b88278c2342ed9520, type: 3}
-  startStoryText: anuannya
-  endStoryText: anu
+    - Dian
+    - Nao
+    resultPrefab: {fileID: 919132149155446097, guid: a7031034a11384ede8cbb36d01911611, type: 3}
+  startStoryText: bhap
+  endStoryText: voomb
