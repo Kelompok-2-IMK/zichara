@@ -20,11 +20,11 @@ MonoBehaviour:
     requiredCards:
     - Dian
     - Shi
-    resultPrefab: {fileID: 919132149155446097, guid: d62412ad1b8bc4baeb7f276b74034c10, type: 3}
+    resultPrefab: {fileID: 919132149155446097, guid: f4c94a6aacb171440a247565330dbb6f, type: 3}
   - recipeName: Komputer
     requiredCards:
     - Dian
     - Nao
-    resultPrefab: {fileID: 919132149155446097, guid: a7031034a11384ede8cbb36d01911611, type: 3}
+    resultPrefab: {fileID: 919132149155446097, guid: f4c94a6aacb171440a247565330dbb6f, type: 3}
   startStoryText: bhap
   endStoryText: voomb

@@ -20,12 +20,12 @@ MonoBehaviour:
     requiredCards:
     - Gong
     - Che
-    resultPrefab: {fileID: 919132149155446097, guid: 7ad68e6e8a5be433b9dbb6b4ff842732, type: 3}
+    resultPrefab: {fileID: 919132149155446097, guid: 7dd487319992c904eab03f66264ed1c9, type: 3}
   - recipeName: Taksi
     requiredCards:
     - Chu
     - Zu
     - Che
-    resultPrefab: {fileID: 919132149155446097, guid: 37bb8666a65bd4b7bb630814d7652674, type: 3}
+    resultPrefab: {fileID: 919132149155446097, guid: 7dd487319992c904eab03f66264ed1c9, type: 3}
   startStoryText: bhap
   endStoryText: voomb

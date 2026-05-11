@@ -46,6 +46,8 @@ MonoBehaviour:
     m_path: Assets/Scenes/Scan_Story2.unity
   - m_enabled: 1
     m_path: Assets/Scenes/Scan_Story3.unity
+  - m_enabled: 1
+    m_path: Assets/Scenes/Scan_Story4.unity
   m_HasScriptingDefines: 0
   m_ScriptingDefines: []
   m_PlayerSettingsYaml:
