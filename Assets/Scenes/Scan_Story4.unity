@@ -352,7 +352,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Story 2
+  m_text: Story 1
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f84b8b40be8e04fc2baff0c187ec85e1, type: 2}
   m_sharedMaterial: {fileID: -5624424111914289484, guid: f84b8b40be8e04fc2baff0c187ec85e1, type: 2}
@@ -577,7 +577,7 @@ GameObject:
   - component: {fileID: 70655777}
   - component: {fileID: 70655776}
   - component: {fileID: 70655775}
-  - component: {fileID: 70655774}
+  - component: {fileID: 70655779}
   m_Layer: 0
   m_Name: Marker_Nao
   m_TagString: Untagged
@@ -585,25 +585,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &70655774
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 70655773}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 1778676317, guid: 8a9a760f95896c34689febc965510927, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Vuforia.Unity.Engine.dll::Vuforia.ImageTargetPreview
-  mObserverBehaviour: {fileID: 70655777}
-  mHiddenRoot: {fileID: 0}
-  mTargetName: otak_nao
-  mDatasetName: Vuforia/zichara_database.xml
-  mCastedBehaviour: {fileID: 70655777}
-  mMeshFilter: {fileID: 0}
-  mMeshRenderer: {fileID: 0}
 --- !u!114 &70655775
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -700,7 +681,7 @@ MonoBehaviour:
   mMotionHint: 1
   mTrackingOptimization: 0
   mTrackingOptimizationNeedsUpgrade: 0
-  mPreview: {fileID: 70655774}
+  mPreview: {fileID: 70655779}
 --- !u!4 &70655778
 Transform:
   m_ObjectHideFlags: 0
@@ -716,6 +697,25 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &70655779
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 70655773}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1778676317, guid: 8a9a760f95896c34689febc965510927, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Vuforia.Unity.Engine.dll::Vuforia.ImageTargetPreview
+  mObserverBehaviour: {fileID: 70655777}
+  mHiddenRoot: {fileID: 0}
+  mTargetName: otak_nao
+  mDatasetName: Vuforia/zichara_database.xml
+  mCastedBehaviour: {fileID: 70655777}
+  mMeshFilter: {fileID: 0}
+  mMeshRenderer: {fileID: 0}
 --- !u!1 &156011787
 GameObject:
   m_ObjectHideFlags: 0
@@ -985,7 +985,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '"Sampai jumpa lagi. Chichi harap kita dapat bertemu lagi"'
+  m_text: '"Chichi senang sudah sampai di rumah nenek. Bantu Chichi menemukan komputer
+    dan televisi di rumah nenek!"'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: cdb1c4b22e1f34a78806ba411c9e9428, type: 2}
   m_sharedMaterial: {fileID: 4592470606714452625, guid: cdb1c4b22e1f34a78806ba411c9e9428, type: 2}
@@ -1122,7 +1123,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Lanjut
+  m_text: Done
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 7701d3783c1f44466b0686c472a14bb0, type: 2}
   m_sharedMaterial: {fileID: -6849863157572725518, guid: 7701d3783c1f44466b0686c472a14bb0, type: 2}
@@ -2569,7 +2570,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '"Wah, akhirnya sampai di stasiun! Mari kabari Nenek!"'
+  m_text: '"Wah, lihat! Kota ini sangat modern. Mari segera pergi ke rumah nenek"'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: cdb1c4b22e1f34a78806ba411c9e9428, type: 2}
   m_sharedMaterial: {fileID: 4592470606714452625, guid: cdb1c4b22e1f34a78806ba411c9e9428, type: 2}
@@ -2982,8 +2983,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '"Nah, Chichi sudah berhasil menghubungi nenek. Selanjutnya, Chichi harus
-    membeli tiket kereta"'
+  m_text: '"Terima kasih telah memilih kendaraanku. Chichi akhirnya bisa sampai di
+    rumah nenek sekarang"'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: cdb1c4b22e1f34a78806ba411c9e9428, type: 2}
   m_sharedMaterial: {fileID: 4592470606714452625, guid: cdb1c4b22e1f34a78806ba411c9e9428, type: 2}
@@ -3837,9 +3838,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '"Sebelum berangkat, aku harus memberi tahu Nenek kalau aku sudah di stasiun.
-    Aku perlu Handphone untuk menghubungi Nenek. Tolong bantu aku cari handphone/telpon
-    untuk menghubungi Neneku"'
+  m_text: '"Rumah Nenek sudah dekat! Tapi sepertinya aku butuh naik bus/taksi untuk
+    menuju rumah nenek. Bantu aku cari bus/taksi!"'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: cdb1c4b22e1f34a78806ba411c9e9428, type: 2}
   m_sharedMaterial: {fileID: 4592470606714452625, guid: cdb1c4b22e1f34a78806ba411c9e9428, type: 2}
@@ -5088,7 +5088,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '"Terima kasih telah membantu Chichi untuk sampai di Rumah Nenek."'
+  m_text: '"Terima kasih telah membantu Chichi untuk sampai di Rumah Nenek. Sampai
+    bertemu lagi ya!"'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: cdb1c4b22e1f34a78806ba411c9e9428, type: 2}
   m_sharedMaterial: {fileID: 4592470606714452625, guid: cdb1c4b22e1f34a78806ba411c9e9428, type: 2}
@@ -6646,7 +6647,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Story 2
+  m_text: Story 1
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f84b8b40be8e04fc2baff0c187ec85e1, type: 2}
   m_sharedMaterial: {fileID: -5624424111914289484, guid: f84b8b40be8e04fc2baff0c187ec85e1, type: 2}
@@ -7197,7 +7198,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Done !
+  m_text: Story 2
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f84b8b40be8e04fc2baff0c187ec85e1, type: 2}
   m_sharedMaterial: {fileID: -5624424111914289484, guid: f84b8b40be8e04fc2baff0c187ec85e1, type: 2}
