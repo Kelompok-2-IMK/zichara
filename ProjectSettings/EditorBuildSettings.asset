@@ -41,6 +41,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Scan_Story3.unity
     guid: e93d0e8ec998dfa4e8a33ab6d41475e8
+  - enabled: 1
+    path: Assets/Scenes/Scan_Story4.unity
+    guid: 255b2b2a12be34c23a0193e65db13198
   m_configObjects:
     UnityEditor.XR.ARCore.ARCoreSettings: {fileID: 11400000, guid: 74919ca663b2f47a38d319a806ac3126, type: 2}
     UnityEditor.XR.ARKit.ARKitSettings: {fileID: 11400000, guid: 3791599672815448888bacacdf4c567e, type: 2}
