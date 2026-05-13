@@ -104,6 +104,7 @@ public class CardSynthesisManager : MonoBehaviour
     {
         List<ZicharaCard> found = new List<ZicharaCard>();
 
+        // 1. Cek apakah semua ID kartu yang diminta ada di kamera
         foreach (string id in recipe.requiredCards)
         {
             ZicharaCard c = cardsOnCamera.Find(card => card.cardID == id);
@@ -111,10 +112,17 @@ public class CardSynthesisManager : MonoBehaviour
             found.Add(c);
         }
 
-        for (int i = 0; i < found.Count; i++)
-            for (int j = i + 1; j < found.Count; j++)
-                if (Vector3.Distance(found[i].transform.position, found[j].transform.position) > proximityThreshold)
-                    return false;
+        // 2. Hitung titik tengah dari semua kartu yang ditemukan
+        Vector3 center = Vector3.zero;
+        foreach (var card in found) center += card.transform.position;
+        center /= found.Count;
+
+        // 3. Cek apakah setiap kartu tidak terlalu jauh dari titik tengah tersebut
+        foreach (var card in found)
+        {
+            if (Vector3.Distance(card.transform.position, center) > proximityThreshold)
+                return false;
+        }
 
         return true;
     }

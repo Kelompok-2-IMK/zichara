@@ -1,40 +1,44 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class LineSequenceAnimator : MonoBehaviour
 {
-    [SerializeField] private float animationDuration = 2f;
-    public LineRenderer line1;
-    public LineRenderer line2;
+    [SerializeField] private float animationDuration = 1f; // Durasi per garis
+    
+    // Menggunakan Array agar bisa memasukkan banyak LineRenderer di Inspector
+    public LineRenderer[] lines; 
 
     private void Start()
     {
-        // Di awal, pastikan semua line mati dulu
-        if (line1 != null) line1.gameObject.SetActive(false);
-        if (line2 != null) line2.gameObject.SetActive(false);
+        // Pastikan semua line dalam keadaan mati dan posisi awal benar saat mulai
+        foreach (LineRenderer lr in lines)
+        {
+            if (lr != null)
+            {
+                lr.gameObject.SetActive(false);
+            }
+        }
 
         StartCoroutine(PlaySequence());
     }
 
     private IEnumerator PlaySequence()
     {
-        // 1. Munculkan dan jalankan Line 1
-        if (line1 != null)
+        // Melakukan looping untuk setiap garis yang ada di dalam array 'lines'
+        for (int i = 0; i < lines.Length; i++)
         {
-            line1.gameObject.SetActive(true); // NYALAKAN LINE 1
-            yield return StartCoroutine(AnimateSingleLine(line1));
-        }
-
-        // 2. Munculkan dan jalankan Line 2 SETELAH Line 1 selesai
-        if (line2 != null)
-        {
-            line2.gameObject.SetActive(true); // NYALAKAN LINE 2
-            yield return StartCoroutine(AnimateSingleLine(line2));
+            if (lines[i] != null)
+            {
+                lines[i].gameObject.SetActive(true); // Aktifkan garis saat ini
+                yield return StartCoroutine(AnimateSingleLine(lines[i]));
+            }
         }
     }
 
     private IEnumerator AnimateSingleLine(LineRenderer lr)
     {
+        // Ambil posisi awal (index 0) dan posisi target akhir (index 1)
         Vector3 startPos = lr.GetPosition(0);
         Vector3 finalTarget = lr.GetPosition(1);
 
@@ -42,9 +46,13 @@ public class LineSequenceAnimator : MonoBehaviour
         while (t < 1.0f)
         {
             t += Time.deltaTime / animationDuration;
+            
+            // Lerp posisi index 1 dari start ke target
             lr.SetPosition(1, Vector3.Lerp(startPos, finalTarget, t));
             yield return null;
         }
+        
+        // Pastikan posisi akhirnya presisi
         lr.SetPosition(1, finalTarget);
     }
 }
