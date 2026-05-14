@@ -20,12 +20,16 @@ MonoBehaviour:
     requiredCards:
     - Gong
     - Che
-    resultPrefab: {fileID: 919132149155446097, guid: 7dd487319992c904eab03f66264ed1c9, type: 3}
+    resultPrefab: {fileID: 919132149155446097, guid: 086fff834047e5f40a788a585e95ee43, type: 3}
+    recipeSuccessSound: {fileID: 8300000, guid: d6f9ea112fcdf494ab67e737206c3e45, type: 3}
   - recipeName: Taksi
     requiredCards:
     - Chu
     - Zu
     - Che
-    resultPrefab: {fileID: 919132149155446097, guid: 7dd487319992c904eab03f66264ed1c9, type: 3}
+    resultPrefab: {fileID: 919132149155446097, guid: d159b7c065dfa78478e1259893bf1f19, type: 3}
+    recipeSuccessSound: {fileID: 8300000, guid: b12cfa81399823146a941ed13d7068c6, type: 3}
   startStoryText: bhap
   endStoryText: voomb
+  missionStartSound: {fileID: 8300000, guid: f51e934dfaa3b75479b329f3b1299f38, type: 3}
+  missionFinishSound: {fileID: 8300000, guid: f51e934dfaa3b75479b329f3b1299f38, type: 3}

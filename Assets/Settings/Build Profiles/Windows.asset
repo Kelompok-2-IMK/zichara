@@ -23,11 +23,7 @@ MonoBehaviour:
   - m_enabled: 1
     m_path: Assets/Scenes/modeSelection.unity
   - m_enabled: 1
-    m_path: Assets/Scenes/Dev.unity
-  - m_enabled: 1
     m_path: Assets/Scenes/freeplay.unity
-  - m_enabled: 1
-    m_path: Assets/Scenes/freeplay 1.unity
   - m_enabled: 1
     m_path: Assets/Scenes/Legends.unity
   - m_enabled: 1

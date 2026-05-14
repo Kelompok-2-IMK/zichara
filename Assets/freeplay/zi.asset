@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: zi
   m_EditorClassIdentifier: Assembly-CSharp::FreeplayData
   dataID: zi
+  successSound: {fileID: 8300000, guid: e03179c7fa1d1a247af842b6a307c054, type: 3}
   hanziRecipes:
   - pinyin: zi
     requiredCards:
