@@ -10,6 +10,7 @@ public class HanziRecipe
     [Header("Visual Result")]
     [Tooltip("Tarik Prefab INDUK (kotak biru) yang berisi semua line ke sini")]
     public GameObject hanziPrefab; 
+    public AudioClip successSound;
 }
 
 [CreateAssetMenu(fileName = "NewFreeplayData", menuName = "Zichara/Freeplay Data")]

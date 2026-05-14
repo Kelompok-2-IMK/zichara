@@ -20,11 +20,15 @@ MonoBehaviour:
     requiredCards:
     - Dian
     - Hua
-    resultPrefab: {fileID: 919132149155446097, guid: f7ebc9efc5b824083a3d8010bcb633c5, type: 3}
+    resultPrefab: {fileID: 919132149155446097, guid: 14707ce1037fe7c479bed9fa115a5d3c, type: 3}
+    recipeSuccessSound: {fileID: 8300000, guid: 2577d8912e377c0439978638d06d6ba0, type: 3}
   - recipeName: Handphone
     requiredCards:
     - Shou
     - Ji
-    resultPrefab: {fileID: 919132149155446097, guid: 7df3b2102002342b88278c2342ed9520, type: 3}
+    resultPrefab: {fileID: 919132149155446097, guid: f38a2f178a5b9a142a95108aa90c8be7, type: 3}
+    recipeSuccessSound: {fileID: 8300000, guid: 272b01fc2147cf349b5a161d8169dedf, type: 3}
   startStoryText: anuannya
   endStoryText: anu
+  missionStartSound: {fileID: 8300000, guid: f51e934dfaa3b75479b329f3b1299f38, type: 3}
+  missionFinishSound: {fileID: 8300000, guid: f51e934dfaa3b75479b329f3b1299f38, type: 3}

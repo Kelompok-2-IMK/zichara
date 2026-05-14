@@ -18,3 +18,4 @@ MonoBehaviour:
     requiredCards:
     - zi
     hanziPrefab: {fileID: 595665634245657729, guid: 32945dbfa087549d6ad58e342fb6f023, type: 3}
+    successSound: {fileID: 8300000, guid: 919b7bf2e997e0348aec0d1cdb250e87, type: 3}

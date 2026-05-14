@@ -20,10 +20,11 @@ public class CardSynthesisManager : MonoBehaviour
     private bool isWaitingForNextMission = false;
     private List<string> completedRecipesInMission = new List<string>();
     private Dictionary<string, GameObject> activeSynthesisObjects = new Dictionary<string, GameObject>();
+    private AudioSource audioSource;
 
     // Nama scene ini, untuk key PlayerPrefs
     private string MissionKey => "CurrentMission_" + SceneManager.GetActiveScene().name;
-
+    
     // Nomor level berdasarkan nama scene (Scan_Story1 → 1, dst)
     private int CurrentLevelNumber
     {
@@ -41,6 +42,9 @@ public class CardSynthesisManager : MonoBehaviour
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
+
+        audioSource = gameObject.AddComponent<AudioSource>(); // ← tambah ini
+        audioSource.playOnAwake = false;
     }
 
     private void Start()
@@ -139,6 +143,10 @@ public class CardSynthesisManager : MonoBehaviour
         GameObject obj = Instantiate(recipe.resultPrefab, pos, Quaternion.identity);
         activeSynthesisObjects.Add(recipe.recipeName, obj);
 
+        // ← tambah ini
+        if (recipe.recipeSuccessSound != null)
+            audioSource.PlayOneShot(recipe.recipeSuccessSound);
+
         if (!completedRecipesInMission.Contains(recipe.recipeName))
         {
             completedRecipesInMission.Add(recipe.recipeName);
@@ -213,6 +221,8 @@ public class CardSynthesisManager : MonoBehaviour
         {
             // Semua misi di level ini selesai
             isMissionFinished = true;
+            if (currentMission.missionFinishSound != null)  // ← tambah ini
+                audioSource.PlayOneShot(currentMission.missionFinishSound);
             Debug.Log("SEMUA MISI LEVEL INI SELESAI!");
 
             // Unlock level berikutnya
@@ -245,15 +255,19 @@ public class CardSynthesisManager : MonoBehaviour
         currentMissionIndex = index;
         completedRecipesInMission.Clear();
 
-        // Simpan progress
         PlayerPrefs.SetInt(MissionKey, index);
         PlayerPrefs.Save();
 
         StoryController story = FindFirstObjectByType<StoryController>();
         if (story != null) story.SetupMissionUI(index + 1);
 
+        // ← tambah ini
+        if (currentMission.missionStartSound != null)
+            audioSource.PlayOneShot(currentMission.missionStartSound);
+
         Debug.Log($"Memulai Misi [{index}]: {currentMission.name}");
     }
+
 
     // ── Tombol "Kembali ke Level Selection" (dipanggil dari popup finish) ──
 

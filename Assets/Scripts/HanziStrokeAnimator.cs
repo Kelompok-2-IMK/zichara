@@ -12,10 +12,19 @@ public class HanziStrokeAnimator : MonoBehaviour
     [SerializeField] private Transform uiCanvasTransform;
 
     private GameObject currentSpawnedHanzi;
+    private AudioSource audioSource;
 
     private void OnEnable()
     {
-        // Berhenti dulu kalau ada animasi sisa yang masih jalan
+        // Inisialisasi AudioSource di sini, bukan di Awake
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>();
+            if (audioSource == null)
+                audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.playOnAwake = false;
+        }
+
         StopAllCoroutines();
         CleanUp();
 
@@ -31,7 +40,10 @@ public class HanziStrokeAnimator : MonoBehaviour
         {
             if (recipe.hanziPrefab == null) continue;
 
-            // Cari objek yang sudah kamu taruh di Canvas (biar ga double)
+            // Null check sebelum play sound
+            if (recipe.successSound != null && audioSource != null)
+                audioSource.PlayOneShot(recipe.successSound);
+
             if (currentSpawnedHanzi == null)
             {
                 Transform found = uiCanvasTransform.Find(recipe.hanziPrefab.name);
@@ -42,19 +54,14 @@ public class HanziStrokeAnimator : MonoBehaviour
             {
                 currentSpawnedHanzi.SetActive(true);
                 
-                // Ambil semua line renderer secara berurutan
                 LineRenderer[] allLines = currentSpawnedHanzi.GetComponentsInChildren<LineRenderer>(true);
 
-                // Reset semua garis jadi mati dulu
                 foreach (var lr in allLines) lr.gameObject.SetActive(false);
 
-                // Mulai gambar satu-satu
                 for (int i = 0; i < allLines.Length; i++)
                 {
                     allLines[i].gameObject.SetActive(true);
                     yield return StartCoroutine(AnimateSingleStroke(allLines[i]));
-                    
-                    // Jeda sangat singkat antar garis biar transisinya mulus
                     yield return new WaitForSeconds(0.05f); 
                 }
             }
@@ -62,58 +69,51 @@ public class HanziStrokeAnimator : MonoBehaviour
     }
 
     private IEnumerator AnimateSingleStroke(LineRenderer lr)
-{
-    // 1. Ambil jumlah titik yang real saat ini
-    int pointCount = lr.positionCount;
-    if (pointCount < 2) yield break;
-
-    // 2. Simpan posisi asli
-    Vector3[] allPoints = new Vector3[pointCount];
-    for (int i = 0; i < pointCount; i++)
     {
-        allPoints[i] = lr.GetPosition(i);
-    }
+        int pointCount = lr.positionCount;
+        if (pointCount < 2) yield break;
 
-    // 3. Reset tampilan: semua titik ditarik ke titik awal
-    for (int i = 1; i < pointCount; i++)
-    {
-        lr.SetPosition(i, allPoints[0]);
-    }
-
-    float segmentDuration = strokeDuration / (pointCount - 1);
-
-    // 4. Mulai animasi per segmen
-    for (int i = 0; i < pointCount - 1; i++)
-    {
-        float elapsed = 0f;
-        Vector3 start = allPoints[i];
-        Vector3 end = allPoints[i + 1];
-
-        while (elapsed < segmentDuration)
+        Vector3[] allPoints = new Vector3[pointCount];
+        for (int i = 0; i < pointCount; i++)
         {
-            // Proteksi jika kartu hilang saat animasi
-            if (lr == null || !this.gameObject.activeInHierarchy) yield break;
+            allPoints[i] = lr.GetPosition(i);
+        }
 
-            elapsed += Time.deltaTime;
-            float t = Mathf.Clamp01(elapsed / segmentDuration);
-            Vector3 currentPos = Vector3.Lerp(start, end, t);
+        for (int i = 1; i < pointCount; i++)
+        {
+            lr.SetPosition(i, allPoints[0]);
+        }
 
-            // Update titik saat ini DAN semua titik setelahnya agar tidak melintang
-            for (int j = i + 1; j < lr.positionCount; j++)
+        float segmentDuration = strokeDuration / (pointCount - 1);
+
+        for (int i = 0; i < pointCount - 1; i++)
+        {
+            float elapsed = 0f;
+            Vector3 start = allPoints[i];
+            Vector3 end = allPoints[i + 1];
+
+            while (elapsed < segmentDuration)
             {
-                lr.SetPosition(j, currentPos);
+                if (lr == null || !this.gameObject.activeInHierarchy) yield break;
+
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / segmentDuration);
+                Vector3 currentPos = Vector3.Lerp(start, end, t);
+
+                for (int j = i + 1; j < lr.positionCount; j++)
+                {
+                    lr.SetPosition(j, currentPos);
+                }
+
+                yield return null;
             }
 
-            yield return null;
-        }
-
-        // Pastikan titik terkunci di posisi akhir segmen
-        if (lr != null && i + 1 < lr.positionCount)
-        {
-            lr.SetPosition(i + 1, end);
+            if (lr != null && i + 1 < lr.positionCount)
+            {
+                lr.SetPosition(i + 1, end);
+            }
         }
     }
-}
 
     private void OnDisable()
     {

@@ -20,11 +20,15 @@ MonoBehaviour:
     requiredCards:
     - Huo
     - Che
-    resultPrefab: {fileID: 919132149155446097, guid: 86139a340e4c84a8bbc67d6619f1f197, type: 3}
+    resultPrefab: {fileID: 919132149155446097, guid: 5e392b07337bc2f4ebfcdf35b47a5c48, type: 3}
+    recipeSuccessSound: {fileID: 8300000, guid: d396c3d556c5d574bba633026246e54f, type: 3}
   - recipeName: Trem
     requiredCards:
     - Dian
     - Che
-    resultPrefab: {fileID: 919132149155446097, guid: 86139a340e4c84a8bbc67d6619f1f197, type: 3}
+    resultPrefab: {fileID: 919132149155446097, guid: e889d262449f4fb49bec1513bec7ca4b, type: 3}
+    recipeSuccessSound: {fileID: 8300000, guid: 5a0973bc81379bc4682ae8596b7c5857, type: 3}
   startStoryText: anuannya
   endStoryText: anu
+  missionStartSound: {fileID: 8300000, guid: f51e934dfaa3b75479b329f3b1299f38, type: 3}
+  missionFinishSound: {fileID: 8300000, guid: f51e934dfaa3b75479b329f3b1299f38, type: 3}
