@@ -53,9 +53,20 @@ public class MainMenuManager : MonoBehaviour
         SceneManager.LoadScene("Level");
     }
 
-    public void QuitGame()
+    public void ResetGame()
     {
-        Application.Quit();
-        Debug.Log("Game Keluar");
+        
+        PlayerPrefs.DeleteAll();
+        
+        
+        
+        PlayerPrefs.Save();
+        
+        Debug.Log("Semua PlayerPrefs berhasil dihapus secara permanen!");
+
+        
+        
+        string currentSceneName = SceneManager.GetActiveScene().name;
+        SceneManager.LoadScene(currentSceneName);
     }
 }
