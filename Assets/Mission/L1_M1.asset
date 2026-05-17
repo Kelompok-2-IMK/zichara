@@ -22,12 +22,14 @@ MonoBehaviour:
     - Bao
     resultPrefab: {fileID: 919132149155446097, guid: 158538fd785cb354081db6700e10c7c6, type: 3}
     recipeSuccessSound: {fileID: 8300000, guid: 32bcf49eb11398d49990a00835a41452, type: 3}
+    pinyinText: MianBao
   - recipeName: Tas Sekolah
     requiredCards:
     - Shu
     - Bao
     resultPrefab: {fileID: 919132149155446097, guid: f0f5c177bd979294d81b7b86c41a4734, type: 3}
     recipeSuccessSound: {fileID: 8300000, guid: cd23b01d88bb69341b75b8d4d03adce9, type: 3}
+    pinyinText: ShuBao
   startStoryText: bhap
   endStoryText: voomb
   missionStartSound: {fileID: 8300000, guid: f51e934dfaa3b75479b329f3b1299f38, type: 3}
