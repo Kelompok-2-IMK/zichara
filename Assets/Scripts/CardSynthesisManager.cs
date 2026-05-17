@@ -40,7 +40,9 @@ public class CardSynthesisManager : MonoBehaviour
     private Dictionary<string, GameObject> activeSynthesisObjects = new Dictionary<string, GameObject>();
     private Dictionary<string, GameObject> activePinyinTexts = new Dictionary<string, GameObject>();
 
-    private AudioSource audioSource;
+    // --- FIX: Pisah AudioSource untuk BGM dan SFX ---
+    private AudioSource bgmSource; // khusus backsound/misi start (loop, bisa di-stop)
+    private AudioSource sfxSource; // khusus SFX pendek (resep berhasil, finish)
 
     private string MissionKey => "CurrentMission_" + SceneManager.GetActiveScene().name;
 
@@ -65,8 +67,13 @@ public class CardSynthesisManager : MonoBehaviour
             return;
         }
 
-        audioSource = gameObject.AddComponent<AudioSource>();
-        audioSource.playOnAwake = false;
+        // --- FIX: Buat dua AudioSource terpisah ---
+        bgmSource = gameObject.AddComponent<AudioSource>();
+        bgmSource.playOnAwake = false;
+        bgmSource.loop = true; // backsound looping
+
+        sfxSource = gameObject.AddComponent<AudioSource>();
+        sfxSource.playOnAwake = false;
 
         if (wrongCombinationAlertUI != null)
             wrongCombinationAlertUI.SetActive(false);
@@ -187,8 +194,9 @@ public class CardSynthesisManager : MonoBehaviour
 
         SpawnPinyinText(recipe, obj);
 
+        // --- FIX: SFX pakai sfxSource (PlayOneShot aman untuk suara pendek) ---
         if (recipe.recipeSuccessSound != null)
-            audioSource.PlayOneShot(recipe.recipeSuccessSound);
+            sfxSource.PlayOneShot(recipe.recipeSuccessSound);
 
         if (!completedRecipesInMission.Contains(recipe.recipeName))
         {
@@ -214,7 +222,6 @@ public class CardSynthesisManager : MonoBehaviour
             textObj = CreateGeneratedPinyinObject(recipe.recipeName);
         }
 
-        // Karena kamu mau 3D text biasa ikut rotasi dunia, Billboard dimatikan otomatis.
         Billboard[] billboards = textObj.GetComponentsInChildren<Billboard>(true);
         foreach (Billboard billboard in billboards)
             billboard.enabled = false;
@@ -462,8 +469,10 @@ public class CardSynthesisManager : MonoBehaviour
         {
             isMissionFinished = true;
 
+            // --- FIX: Stop BGM dulu, lalu play finish SFX lewat sfxSource ---
+            bgmSource.Stop();
             if (currentMission.missionFinishSound != null)
-                audioSource.PlayOneShot(currentMission.missionFinishSound);
+                sfxSource.PlayOneShot(currentMission.missionFinishSound);
 
             int thisLevel = CurrentLevelNumber;
             int lastCleared = PlayerPrefs.GetInt("LastClearedLevel", 1);
@@ -509,8 +518,13 @@ public class CardSynthesisManager : MonoBehaviour
         if (story != null)
             story.SetupMissionUI(index + 1);
 
+        // --- FIX: Stop BGM lama dulu sebelum play yang baru, cegah double sound ---
+        bgmSource.Stop();
         if (currentMission.missionStartSound != null)
-            audioSource.PlayOneShot(currentMission.missionStartSound);
+        {
+            bgmSource.clip = currentMission.missionStartSound;
+            bgmSource.Play();
+        }
     }
 
     public void GoToLevelSelection()

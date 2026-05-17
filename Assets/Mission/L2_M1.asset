@@ -33,4 +33,4 @@ MonoBehaviour:
   startStoryText: anuannya
   endStoryText: anu
   missionStartSound: {fileID: 8300000, guid: f51e934dfaa3b75479b329f3b1299f38, type: 3}
-  missionFinishSound: {fileID: 8300000, guid: f51e934dfaa3b75479b329f3b1299f38, type: 3}
+  missionFinishSound: {fileID: 0}
