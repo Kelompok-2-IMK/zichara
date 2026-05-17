@@ -42,7 +42,7 @@ public class HanziStrokeAnimator : MonoBehaviour
 
             // Null check sebelum play sound
             if (recipe.successSound != null && audioSource != null)
-                audioSource.PlayOneShot(recipe.successSound);
+                audioSource.PlayOneShot(recipe.successSound, 5f);
 
             if (currentSpawnedHanzi == null)
             {

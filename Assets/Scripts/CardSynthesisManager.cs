@@ -20,7 +20,11 @@ public class CardSynthesisManager : MonoBehaviour
     private bool isWaitingForNextMission = false;
     private List<string> completedRecipesInMission = new List<string>();
     private Dictionary<string, GameObject> activeSynthesisObjects = new Dictionary<string, GameObject>();
-    private AudioSource audioSource;
+    private Dictionary<string, GameObject> activePinyinTexts = new Dictionary<string, GameObject>();
+
+    // --- FIX: Pisah AudioSource untuk BGM dan SFX ---
+    private AudioSource bgmSource; // khusus backsound/misi start (loop, bisa di-stop)
+    private AudioSource sfxSource; // khusus SFX pendek (resep berhasil, finish)
 
     // Nama scene ini, untuk key PlayerPrefs
     private string MissionKey => "CurrentMission_" + SceneManager.GetActiveScene().name;
@@ -43,8 +47,16 @@ public class CardSynthesisManager : MonoBehaviour
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
 
-        audioSource = gameObject.AddComponent<AudioSource>(); // ← tambah ini
-        audioSource.playOnAwake = false;
+        // --- FIX: Buat dua AudioSource terpisah ---
+        bgmSource = gameObject.AddComponent<AudioSource>();
+        bgmSource.playOnAwake = false;
+        bgmSource.loop = true; // backsound looping
+
+        sfxSource = gameObject.AddComponent<AudioSource>();
+        sfxSource.playOnAwake = false;
+
+        if (wrongCombinationAlertUI != null)
+            wrongCombinationAlertUI.SetActive(false);
     }
 
     private void Start()
@@ -143,15 +155,84 @@ public class CardSynthesisManager : MonoBehaviour
         GameObject obj = Instantiate(recipe.resultPrefab, pos, Quaternion.identity);
         activeSynthesisObjects.Add(recipe.recipeName, obj);
 
-        // ← tambah ini
+        SpawnPinyinText(recipe, obj);
+
+        // --- FIX: SFX pakai sfxSource (PlayOneShot aman untuk suara pendek) ---
         if (recipe.recipeSuccessSound != null)
-            audioSource.PlayOneShot(recipe.recipeSuccessSound);
+            sfxSource.PlayOneShot(recipe.recipeSuccessSound);
 
         if (!completedRecipesInMission.Contains(recipe.recipeName))
         {
             completedRecipesInMission.Add(recipe.recipeName);
             CheckMissionCompletion();
         }
+    }
+
+    private void SpawnPinyinText(CardRecipe recipe, GameObject targetObject)
+    {
+        if (string.IsNullOrWhiteSpace(recipe.pinyinText)) return;
+
+        GameObject textObj;
+
+        if (pinyinTextPrefab != null)
+        {
+            textObj = Instantiate(pinyinTextPrefab);
+            textObj.name = "FloatingPinyin_" + recipe.recipeName;
+            textObj.SetActive(true);
+        }
+        else
+        {
+            textObj = CreateGeneratedPinyinObject(recipe.recipeName);
+        }
+
+        Billboard[] billboards = textObj.GetComponentsInChildren<Billboard>(true);
+        foreach (Billboard billboard in billboards)
+            billboard.enabled = false;
+
+        Canvas canvas = textObj.GetComponentInChildren<Canvas>(true);
+        if (canvas != null)
+        {
+            canvas.renderMode = RenderMode.WorldSpace;
+            canvas.worldCamera = Camera.main;
+            canvas.overrideSorting = true;
+            canvas.sortingOrder = 30;
+        }
+
+        TMP_Text tmpText = textObj.GetComponentInChildren<TMP_Text>(true);
+        if (tmpText != null)
+        {
+            tmpText.text = recipe.pinyinText;
+            tmpText.alignment = TextAlignmentOptions.Center;
+            tmpText.enableWordWrapping = false;
+            tmpText.overflowMode = TextOverflowModes.Overflow;
+            tmpText.gameObject.SetActive(true);
+        }
+        else
+        {
+            Debug.LogWarning("Pinyin prefab tidak punya komponen TMP_Text/TextMeshPro.");
+        }
+
+        activePinyinTexts.Add(recipe.recipeName, textObj);
+        UpdatePinyinTextTransform(recipe.recipeName, targetObject, recipe);
+    }
+
+    private GameObject CreateGeneratedPinyinObject(string recipeName)
+    {
+        GameObject textObj = new GameObject("FloatingPinyin_" + recipeName);
+
+        TextMeshPro tmp = textObj.AddComponent<TextMeshPro>();
+        tmp.text = "Pinyin";
+        tmp.fontSize = 3f;
+        tmp.alignment = TextAlignmentOptions.Center;
+        tmp.enableWordWrapping = false;
+        tmp.overflowMode = TextOverflowModes.Overflow;
+        tmp.color = Color.white;
+
+        tmp.rectTransform.sizeDelta = new Vector2(5f, 1f);
+
+        textObj.transform.localScale = generatedPinyinScale;
+
+        return textObj;
     }
 
     private void RemoveSynthesis(string recipeName)
@@ -221,9 +302,11 @@ public class CardSynthesisManager : MonoBehaviour
         {
             // Semua misi di level ini selesai
             isMissionFinished = true;
-            if (currentMission.missionFinishSound != null)  // ← tambah ini
-                audioSource.PlayOneShot(currentMission.missionFinishSound);
-            Debug.Log("SEMUA MISI LEVEL INI SELESAI!");
+
+            // --- FIX: Stop BGM dulu, lalu play finish SFX lewat sfxSource ---
+            bgmSource.Stop();
+            if (currentMission.missionFinishSound != null)
+                sfxSource.PlayOneShot(currentMission.missionFinishSound);
 
             // Unlock level berikutnya
             int thisLevel = CurrentLevelNumber;
@@ -261,11 +344,13 @@ public class CardSynthesisManager : MonoBehaviour
         StoryController story = FindFirstObjectByType<StoryController>();
         if (story != null) story.SetupMissionUI(index + 1);
 
-        // ← tambah ini
+        // --- FIX: Stop BGM lama dulu sebelum play yang baru, cegah double sound ---
+        bgmSource.Stop();
         if (currentMission.missionStartSound != null)
-            audioSource.PlayOneShot(currentMission.missionStartSound);
-
-        Debug.Log($"Memulai Misi [{index}]: {currentMission.name}");
+        {
+            bgmSource.clip = currentMission.missionStartSound;
+            bgmSource.Play();
+        }
     }
 
 
