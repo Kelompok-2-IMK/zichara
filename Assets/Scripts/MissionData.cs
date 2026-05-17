@@ -5,17 +5,20 @@ using UnityEngine;
 [System.Serializable]
 public class CardRecipe
 {
-    public string recipeName; // Misal: "Roti" atau "Sepeda"
-    public List<string> requiredCards; // Misal: ["Mian", "Bao"] atau ["Zi", "Xing", "Che"]
-    public GameObject resultPrefab; // Model 3D-nya
-    public AudioClip recipeSuccessSound; // Suara saat berhasil buat resep
+    public string recipeName; 
+    public List<string> requiredCards; 
+    public GameObject resultPrefab; 
+    public AudioClip recipeSuccessSound; 
+    
+    // --- FITUR QOL: TEKS PINYIN ---
+    [Tooltip("Teks Pinyin yang akan melayang di atas 3D")]
+    public string pinyinText; 
 }
 
-// Aturan Menang: Harus nemu SEMUA resep, atau SALAH SATU saja?
 public enum MissionCompletionRule 
 { 
-    RequireAllRecipes, // Untuk Misi 1 (Roti DAN Tas)
-    RequireAnyRecipe   // Untuk Misi 2 (Sepeda ATAU Kereta) 
+    RequireAllRecipes, 
+    RequireAnyRecipe   
 }
 
 [CreateAssetMenu(fileName = "NewMission", menuName = "Zichara/Mission Data")]
@@ -28,13 +31,13 @@ public class MissionData : ScriptableObject
     [Header("Logika Multi-Resep")]
     [Tooltip("Pilih RequireAll untuk Misi 1, pilih RequireAny untuk Misi 2")]
     public MissionCompletionRule completionRule;
-    public List<CardRecipe> recipes; // Daftar kombinasi yang bisa dibuat
+    public List<CardRecipe> recipes; 
 
     [Header("Teks Cerita (Tugas Temanmu)")]
     [TextArea(3, 5)] public string startStoryText;
     [TextArea(3, 5)] public string endStoryText;
 
     [Header("Sound")]
-    public AudioClip missionStartSound;   // bunyi saat misi dimulai
-    public AudioClip missionFinishSound;  // bunyi saat semua resep selesai
+    public AudioClip missionStartSound;   
+    public AudioClip missionFinishSound;  
 }

@@ -22,18 +22,21 @@ MonoBehaviour:
     - Jia
     resultPrefab: {fileID: 919132149155446097, guid: 75f07063dbe311542be6d304abd82c6d, type: 3}
     recipeSuccessSound: {fileID: 8300000, guid: 7418d1d3499225f4f98dc4c51347c64e, type: 3}
+    pinyinText: ShuJi
   - recipeName: Gelas Air
     requiredCards:
     - Shui
     - Bei
     resultPrefab: {fileID: 919132149155446097, guid: 984249ce0cf9b344ca96d1ee2be39715, type: 3}
     recipeSuccessSound: {fileID: 8300000, guid: 92dd85bc31f233a4691d441d5087e4e9, type: 3}
+    pinyinText: ShuiBei
   - recipeName: Jam Tangan
     requiredCards:
     - Shou
     - Biao
     resultPrefab: {fileID: 919132149155446097, guid: 7a786544ecdef7a45a07c3ea14453a12, type: 3}
     recipeSuccessSound: {fileID: 8300000, guid: 72a99f6e53471794e93c46d48b373f3c, type: 3}
+    pinyinText: ShouBiao
   startStoryText: 
   endStoryText: 
   missionStartSound: {fileID: 8300000, guid: f51e934dfaa3b75479b329f3b1299f38, type: 3}

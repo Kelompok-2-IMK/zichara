@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using TMPro;
 using IEnumerator = System.Collections.IEnumerator;
 
 public class CardSynthesisManager : MonoBehaviour
@@ -11,6 +12,21 @@ public class CardSynthesisManager : MonoBehaviour
     public List<MissionData> levelMissions;
     public float proximityThreshold = 2.0f;
 
+    [Header("Fitur QoL: Pinyin & Alert")]
+    public GameObject pinyinTextPrefab;
+
+    [Tooltip("Jarak teks dari bagian paling atas asset 3D. Untuk roti coba 0.25 - 0.45")]
+    public float pinyinHeightOffset = 0.35f;
+
+    [Tooltip("Rotasi tambahan untuk teks. Kalau teks kebalik, coba Y = 180")]
+    public Vector3 pinyinRotationOffset = Vector3.zero;
+
+    [Tooltip("Ukuran default kalau prefab pinyinTextPrefab kosong dan script membuat TextMeshPro otomatis")]
+    public Vector3 generatedPinyinScale = new Vector3(0.03f, 0.03f, 0.03f);
+
+    public GameObject wrongCombinationAlertUI;
+    public float wrongAlertDuration = 2.0f;
+
     [Header("Debug Status")]
     public MissionData currentMission;
     public List<ZicharaCard> cardsOnCamera = new List<ZicharaCard>();
@@ -18,6 +34,8 @@ public class CardSynthesisManager : MonoBehaviour
     private int currentMissionIndex = 0;
     private bool isMissionFinished = false;
     private bool isWaitingForNextMission = false;
+    private float wrongAlertCooldown = 0f;
+
     private List<string> completedRecipesInMission = new List<string>();
     private Dictionary<string, GameObject> activeSynthesisObjects = new Dictionary<string, GameObject>();
     private Dictionary<string, GameObject> activePinyinTexts = new Dictionary<string, GameObject>();
@@ -26,18 +44,16 @@ public class CardSynthesisManager : MonoBehaviour
     private AudioSource bgmSource; // khusus backsound/misi start (loop, bisa di-stop)
     private AudioSource sfxSource; // khusus SFX pendek (resep berhasil, finish)
 
-    // Nama scene ini, untuk key PlayerPrefs
     private string MissionKey => "CurrentMission_" + SceneManager.GetActiveScene().name;
-    
-    // Nomor level berdasarkan nama scene (Scan_Story1 → 1, dst)
+
     private int CurrentLevelNumber
     {
         get
         {
             string name = SceneManager.GetActiveScene().name;
-            // Ambil angka terakhir dari nama scene
             if (name.Length > 0 && char.IsDigit(name[name.Length - 1]))
                 return int.Parse(name[name.Length - 1].ToString());
+
             return 1;
         }
     }
@@ -45,7 +61,11 @@ public class CardSynthesisManager : MonoBehaviour
     private void Awake()
     {
         if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
 
         // --- FIX: Buat dua AudioSource terpisah ---
         bgmSource = gameObject.AddComponent<AudioSource>();
@@ -71,7 +91,22 @@ public class CardSynthesisManager : MonoBehaviour
         }
     }
 
-    // ── Kartu masuk/keluar kamera ──────────────────────────────────────────
+    private void Update()
+    {
+        if (currentMission == null || isMissionFinished) return;
+
+        CheckRecipes();
+        UpdateObjectPositions();
+
+        if (wrongAlertCooldown > 0)
+        {
+            wrongAlertCooldown -= Time.deltaTime;
+        }
+        else
+        {
+            CheckForWrongCombinations();
+        }
+    }
 
     public void AddActiveCard(ZicharaCard card)
     {
@@ -91,15 +126,6 @@ public class CardSynthesisManager : MonoBehaviour
         }
     }
 
-    // ── Update loop ────────────────────────────────────────────────────────
-
-    private void Update()
-    {
-        if (currentMission == null || isMissionFinished) return;
-        CheckRecipes();
-        UpdateObjectPositions();
-    }
-
     private void CheckRecipes()
     {
         foreach (CardRecipe recipe in currentMission.recipes)
@@ -110,31 +136,39 @@ public class CardSynthesisManager : MonoBehaviour
             bool isSpawned = activeSynthesisObjects.ContainsKey(recipe.recipeName);
 
             if (formed && !isSpawned)
+            {
                 SpawnSynthesis(recipe);
+            }
             else if (!formed && isSpawned)
+            {
                 RemoveSynthesis(recipe.recipeName);
+            }
         }
     }
 
     private bool IsRecipeFormed(CardRecipe recipe)
     {
+        if (recipe.requiredCards == null || recipe.requiredCards.Count == 0)
+            return false;
+
         List<ZicharaCard> found = new List<ZicharaCard>();
 
-        // 1. Cek apakah semua ID kartu yang diminta ada di kamera
         foreach (string id in recipe.requiredCards)
         {
             ZicharaCard c = cardsOnCamera.Find(card => card.cardID == id);
             if (c == null) return false;
+
             found.Add(c);
         }
 
-        // 2. Hitung titik tengah dari semua kartu yang ditemukan
         Vector3 center = Vector3.zero;
-        foreach (var card in found) center += card.transform.position;
+
+        foreach (ZicharaCard card in found)
+            center += card.transform.position;
+
         center /= found.Count;
 
-        // 3. Cek apakah setiap kartu tidak terlalu jauh dari titik tengah tersebut
-        foreach (var card in found)
+        foreach (ZicharaCard card in found)
         {
             if (Vector3.Distance(card.transform.position, center) > proximityThreshold)
                 return false;
@@ -145,14 +179,17 @@ public class CardSynthesisManager : MonoBehaviour
 
     private void SpawnSynthesis(CardRecipe recipe)
     {
-        if (recipe.resultPrefab == null)
-        {
-            Debug.LogError($"resultPrefab NULL untuk resep '{recipe.recipeName}'!");
-            return;
-        }
+        if (recipe.resultPrefab == null) return;
 
         Vector3 pos = CalculateCentroid(recipe.requiredCards);
-        GameObject obj = Instantiate(recipe.resultPrefab, pos, Quaternion.identity);
+
+        Quaternion spawnRotation = Quaternion.identity;
+        ZicharaCard refCard = GetReferenceCard(recipe);
+
+        if (refCard != null)
+            spawnRotation = refCard.transform.rotation;
+
+        GameObject obj = Instantiate(recipe.resultPrefab, pos, spawnRotation);
         activeSynthesisObjects.Add(recipe.recipeName, obj);
 
         SpawnPinyinText(recipe, obj);
@@ -239,8 +276,18 @@ public class CardSynthesisManager : MonoBehaviour
     {
         if (activeSynthesisObjects.TryGetValue(recipeName, out GameObject obj))
         {
-            if (obj != null) Destroy(obj);
+            if (obj != null)
+                Destroy(obj);
+
             activeSynthesisObjects.Remove(recipeName);
+        }
+
+        if (activePinyinTexts.TryGetValue(recipeName, out GameObject textObj))
+        {
+            if (textObj != null)
+                Destroy(textObj);
+
+            activePinyinTexts.Remove(recipeName);
         }
     }
 
@@ -251,31 +298,150 @@ public class CardSynthesisManager : MonoBehaviour
             CardRecipe recipe = currentMission.recipes.Find(r => r.recipeName == entry.Key);
             if (recipe == null || entry.Value == null) continue;
 
-            entry.Value.transform.position = CalculateCentroid(recipe.requiredCards);
+            GameObject synthesisObject = entry.Value;
 
-            ZicharaCard refCard = cardsOnCamera.Find(c => c.cardID == recipe.requiredCards[0]);
+            synthesisObject.transform.position = CalculateCentroid(recipe.requiredCards);
+
+            ZicharaCard refCard = GetReferenceCard(recipe);
             if (refCard != null)
-                entry.Value.transform.rotation = refCard.transform.rotation;
+                synthesisObject.transform.rotation = refCard.transform.rotation;
+
+            UpdatePinyinTextTransform(entry.Key, synthesisObject, recipe);
         }
+    }
+
+    private void UpdatePinyinTextTransform(string recipeName, GameObject targetObject, CardRecipe recipe)
+    {
+        if (!activePinyinTexts.TryGetValue(recipeName, out GameObject textObj)) return;
+        if (textObj == null || targetObject == null) return;
+
+        Vector3 labelPosition = GetPinyinWorldPosition(targetObject);
+        Quaternion labelRotation = targetObject.transform.rotation * Quaternion.Euler(pinyinRotationOffset);
+
+        textObj.transform.position = labelPosition;
+        textObj.transform.rotation = labelRotation;
+
+        TMP_Text tmpText = textObj.GetComponentInChildren<TMP_Text>(true);
+        if (tmpText != null && tmpText.text != recipe.pinyinText)
+            tmpText.text = recipe.pinyinText;
+    }
+
+    private Vector3 GetPinyinWorldPosition(GameObject targetObject)
+    {
+        Renderer[] renderers = targetObject.GetComponentsInChildren<Renderer>();
+
+        if (renderers.Length == 0)
+            return targetObject.transform.position + Vector3.up * pinyinHeightOffset;
+
+        Bounds bounds = renderers[0].bounds;
+
+        for (int i = 1; i < renderers.Length; i++)
+            bounds.Encapsulate(renderers[i].bounds);
+
+        return new Vector3(
+            bounds.center.x,
+            bounds.max.y + pinyinHeightOffset,
+            bounds.center.z
+        );
+    }
+
+    private ZicharaCard GetReferenceCard(CardRecipe recipe)
+    {
+        if (recipe.requiredCards == null || recipe.requiredCards.Count == 0)
+            return null;
+
+        return cardsOnCamera.Find(c => c.cardID == recipe.requiredCards[0]);
     }
 
     private Vector3 CalculateCentroid(List<string> reqCards)
     {
+        if (reqCards == null || reqCards.Count == 0)
+            return Vector3.zero;
+
         Vector3 sum = Vector3.zero;
         int count = 0;
+
         foreach (string id in reqCards)
         {
             ZicharaCard c = cardsOnCamera.Find(card => card.cardID == id);
-            if (c != null) { sum += c.transform.position; count++; }
+
+            if (c != null)
+            {
+                sum += c.transform.position;
+                count++;
+            }
         }
+
         return count > 0 ? sum / count : Vector3.zero;
     }
 
-    // ── Misi selesai ───────────────────────────────────────────────────────
+    private void CheckForWrongCombinations()
+    {
+        if (cardsOnCamera.Count < 2) return;
+
+        for (int i = 0; i < cardsOnCamera.Count; i++)
+        {
+            for (int j = i + 1; j < cardsOnCamera.Count; j++)
+            {
+                if (Vector3.Distance(cardsOnCamera[i].transform.position, cardsOnCamera[j].transform.position) <= proximityThreshold)
+                {
+                    bool isPairValidInAnyRecipe = false;
+
+                    foreach (CardRecipe recipe in currentMission.recipes)
+                    {
+                        if (recipe.requiredCards.Contains(cardsOnCamera[i].cardID) &&
+                            recipe.requiredCards.Contains(cardsOnCamera[j].cardID))
+                        {
+                            isPairValidInAnyRecipe = true;
+                            break;
+                        }
+                    }
+
+                    if (!isPairValidInAnyRecipe)
+                    {
+                        TriggerWrongCombinationAlert();
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    private void TriggerWrongCombinationAlert()
+    {
+        if (wrongCombinationAlertUI != null && !wrongCombinationAlertUI.activeSelf)
+        {
+            Debug.Log("Kombinasi Salah Ditemukan!");
+            StartCoroutine(ShowAlertRoutine());
+        }
+    }
+
+    private IEnumerator ShowAlertRoutine()
+    {
+        wrongCombinationAlertUI.SetActive(true);
+        wrongAlertCooldown = wrongAlertDuration + 1.0f;
+
+        yield return new WaitForSeconds(wrongAlertDuration);
+
+        wrongCombinationAlertUI.SetActive(false);
+    }
 
     private void CheckMissionCompletion()
     {
-        if (completedRecipesInMission.Count >= currentMission.recipes.Count && !isWaitingForNextMission)
+        if (currentMission == null) return;
+
+        bool completed = false;
+
+        if (currentMission.completionRule == MissionCompletionRule.RequireAllRecipes)
+        {
+            completed = completedRecipesInMission.Count >= currentMission.recipes.Count;
+        }
+        else if (currentMission.completionRule == MissionCompletionRule.RequireAnyRecipe)
+        {
+            completed = completedRecipesInMission.Count >= 1;
+        }
+
+        if (completed && !isWaitingForNextMission)
         {
             isWaitingForNextMission = true;
             Debug.Log($"Misi {currentMission.name} Selesai! Menunggu 5 detik...");
@@ -286,6 +452,7 @@ public class CardSynthesisManager : MonoBehaviour
     private IEnumerator WaitAndLoadNextMission(float delay)
     {
         yield return new WaitForSeconds(delay);
+
         isWaitingForNextMission = false;
         LoadNextMissionInQueue();
     }
@@ -300,7 +467,6 @@ public class CardSynthesisManager : MonoBehaviour
         }
         else
         {
-            // Semua misi di level ini selesai
             isMissionFinished = true;
 
             // --- FIX: Stop BGM dulu, lalu play finish SFX lewat sfxSource ---
@@ -308,31 +474,38 @@ public class CardSynthesisManager : MonoBehaviour
             if (currentMission.missionFinishSound != null)
                 sfxSource.PlayOneShot(currentMission.missionFinishSound);
 
-            // Unlock level berikutnya
             int thisLevel = CurrentLevelNumber;
             int lastCleared = PlayerPrefs.GetInt("LastClearedLevel", 1);
-            if (thisLevel >= lastCleared)
-            {
-                PlayerPrefs.SetInt("LastClearedLevel", thisLevel + 1);
-            }
 
-            // Reset progress misi level ini (kalau dimainin ulang mulai dari misi 1)
+            if (thisLevel >= lastCleared)
+                PlayerPrefs.SetInt("LastClearedLevel", thisLevel + 1);
+
             PlayerPrefs.SetInt(MissionKey, 0);
             PlayerPrefs.Save();
 
-            // Tampilkan popup finish via StoryController
             StoryController story = FindFirstObjectByType<StoryController>();
-            if (story != null) story.SetupMissionUI(99); // 99 = kode "finish"
+            if (story != null)
+                story.SetupMissionUI(99);
         }
     }
-
-    // ── Load misi ─────────────────────────────────────────────────────────
 
     private void LoadMission(int index)
     {
         foreach (var entry in activeSynthesisObjects)
-            if (entry.Value != null) Destroy(entry.Value);
+        {
+            if (entry.Value != null)
+                Destroy(entry.Value);
+        }
+
         activeSynthesisObjects.Clear();
+
+        foreach (var entry in activePinyinTexts)
+        {
+            if (entry.Value != null)
+                Destroy(entry.Value);
+        }
+
+        activePinyinTexts.Clear();
 
         currentMission = levelMissions[index];
         currentMissionIndex = index;
@@ -342,7 +515,8 @@ public class CardSynthesisManager : MonoBehaviour
         PlayerPrefs.Save();
 
         StoryController story = FindFirstObjectByType<StoryController>();
-        if (story != null) story.SetupMissionUI(index + 1);
+        if (story != null)
+            story.SetupMissionUI(index + 1);
 
         // --- FIX: Stop BGM lama dulu sebelum play yang baru, cegah double sound ---
         bgmSource.Stop();
@@ -353,29 +527,28 @@ public class CardSynthesisManager : MonoBehaviour
         }
     }
 
-
-    // ── Tombol "Kembali ke Level Selection" (dipanggil dari popup finish) ──
-
     public void GoToLevelSelection()
     {
         SceneManager.LoadScene("LevelSelection");
     }
 
-    // ── Validasi di Start ─────────────────────────────────────────────────
-
     private void ValidateMissions()
     {
         for (int i = 0; i < levelMissions.Count; i++)
         {
-            if (levelMissions[i] == null)
-            {
-                Debug.LogError($"levelMissions[{i}] is NULL!");
-                continue;
-            }
+            if (levelMissions[i] == null) continue;
+
             foreach (CardRecipe recipe in levelMissions[i].recipes)
             {
                 if (recipe.resultPrefab == null)
+                {
                     Debug.LogError($"Mission '{levelMissions[i].name}' → Recipe '{recipe.recipeName}' has no resultPrefab!");
+                }
+
+                if (string.IsNullOrWhiteSpace(recipe.pinyinText))
+                {
+                    Debug.LogWarning($"Mission '{levelMissions[i].name}' → Recipe '{recipe.recipeName}' belum punya pinyinText.");
+                }
             }
         }
     }
