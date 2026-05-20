@@ -3,7 +3,7 @@ using Vuforia;
 using System.Collections;
 
 [RequireComponent(typeof(ObserverBehaviour))]
-[RequireComponent(typeof(AudioSource))]  // ← tambah ini
+[RequireComponent(typeof(AudioSource))]  
 public class ZicharaCard : MonoBehaviour
 {
     public string cardID;
@@ -13,14 +13,17 @@ public class ZicharaCard : MonoBehaviour
     public float lostDelay = 0.75f; 
 
     private ObserverBehaviour mObserverBehaviour;
-    private AudioSource audioSource;  // ← tambah ini
+    private AudioSource audioSource;  
     private Coroutine lostCoroutine;
-    private bool hasPlayedSound = false;  // ← biar sound gak spam tiap frame
+    private bool hasPlayedSound = false;  
+
+    // Sekarang FreeplaySynthesisManager bisa membaca variabel ini dengan akurat!
+    [HideInInspector] public bool isTracked = false;
 
     void Start()
     {
-        audioSource = GetComponent<AudioSource>();  // ← tambah ini
-        audioSource.playOnAwake = false;            // ← matiin auto-play
+        audioSource = GetComponent<AudioSource>();  
+        audioSource.playOnAwake = false;            
 
         mObserverBehaviour = GetComponent<ObserverBehaviour>();
         if (mObserverBehaviour)
@@ -48,7 +51,7 @@ public class ZicharaCard : MonoBehaviour
         }
         else 
         {
-            hasPlayedSound = false;  // ← reset biar bisa bunyi lagi saat scan ulang
+            hasPlayedSound = false;  
 
             if (gameObject.activeInHierarchy)
             {
@@ -60,6 +63,9 @@ public class ZicharaCard : MonoBehaviour
 
     private void ReportArrival()
     {
+        // 1. Set status tracked jadi true agar dibaca oleh FreeplaySynthesisManager
+        isTracked = true;
+
         // Play sound sekali saat pertama kali terdeteksi
         if (!hasPlayedSound && scanSound != null && audioSource != null)
         {
@@ -76,6 +82,10 @@ public class ZicharaCard : MonoBehaviour
     private IEnumerator DelayedRemove()
     {
         yield return new WaitForSeconds(lostDelay);
+
+        // 2. Set status tracked jadi false setelah masa toleransi habis
+        isTracked = false;
+
         if (CardSynthesisManager.Instance != null)
         {
             CardSynthesisManager.Instance.RemoveActiveCard(this);
