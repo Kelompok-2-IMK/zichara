@@ -3,25 +3,33 @@ using Vuforia;
 using System.Collections;
 
 [RequireComponent(typeof(ObserverBehaviour))]
+[RequireComponent(typeof(AudioSource))]  
 public class ZicharaCard : MonoBehaviour
 {
     public string cardID;
+    public AudioClip scanSound;
     
     [Tooltip("Waktu toleransi (detik) jika kartu tiba-tiba hilang fokus di HP")]
     public float lostDelay = 0.75f; 
 
     private ObserverBehaviour mObserverBehaviour;
+    private AudioSource audioSource;  
     private Coroutine lostCoroutine;
+    private bool hasPlayedSound = false;  
+
+    // Sekarang FreeplaySynthesisManager bisa membaca variabel ini dengan akurat!
+    [HideInInspector] public bool isTracked = false;
 
     void Start()
     {
+        audioSource = GetComponent<AudioSource>();  
+        audioSource.playOnAwake = false;            
+
         mObserverBehaviour = GetComponent<ObserverBehaviour>();
         if (mObserverBehaviour)
         {
             mObserverBehaviour.OnTargetStatusChanged += OnTargetStatusChanged;
 
-            // --- TAMBAHAN PENTING ---
-            // Cek status saat ini juga. Kadang pas Start, kartu sudah terdeteksi
             if (mObserverBehaviour.TargetStatus.Status == Status.TRACKED || 
                 mObserverBehaviour.TargetStatus.Status == Status.EXTENDED_TRACKED)
             {
@@ -43,6 +51,8 @@ public class ZicharaCard : MonoBehaviour
         }
         else 
         {
+            hasPlayedSound = false;  
+
             if (gameObject.activeInHierarchy)
             {
                 if (lostCoroutine != null) StopCoroutine(lostCoroutine);
@@ -51,9 +61,18 @@ public class ZicharaCard : MonoBehaviour
         }
     }
 
-    // Fungsi helper supaya lebih rapi dan aman dari NullReference
     private void ReportArrival()
     {
+        // 1. Set status tracked jadi true agar dibaca oleh FreeplaySynthesisManager
+        isTracked = true;
+
+        // Play sound sekali saat pertama kali terdeteksi
+        if (!hasPlayedSound && scanSound != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(scanSound);
+            hasPlayedSound = true;
+        }
+
         if (CardSynthesisManager.Instance != null)
         {
             CardSynthesisManager.Instance.AddActiveCard(this);
@@ -63,6 +82,10 @@ public class ZicharaCard : MonoBehaviour
     private IEnumerator DelayedRemove()
     {
         yield return new WaitForSeconds(lostDelay);
+
+        // 2. Set status tracked jadi false setelah masa toleransi habis
+        isTracked = false;
+
         if (CardSynthesisManager.Instance != null)
         {
             CardSynthesisManager.Instance.RemoveActiveCard(this);
@@ -72,7 +95,6 @@ public class ZicharaCard : MonoBehaviour
 
     private void OnDestroy()
     {
-        // Pastikan lapor pergi saat object dihancurkan agar tidak nyangkut di list Manager
         if (CardSynthesisManager.Instance != null)
         {
             CardSynthesisManager.Instance.RemoveActiveCard(this);

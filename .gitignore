@@ -56,6 +56,8 @@ ExportedObj/
 *.VC.db
 *.fbx.meta
 *.fbx
+*.FBX
+Assets/3Dfbx/
 
 
 # Unity3D generated meta files
