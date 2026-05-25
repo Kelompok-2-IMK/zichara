@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 8727643141418486322}
   - component: {fileID: 8488529555702197356}
-  - component: {fileID: 3355320530911670212}
   m_Layer: 0
   m_Name: che 3
   m_TagString: Untagged
@@ -143,17 +142,3 @@ LineRenderer:
   m_UseWorldSpace: 1
   m_Loop: 0
   m_ApplyActiveColorSpace: 1
---- !u!114 &3355320530911670212
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2980759530629600030}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 42c7416310adaa843beb2842634261ba, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LineAnimator
-  animationDuration: 2
-  lines: []
