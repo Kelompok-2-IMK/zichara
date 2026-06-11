@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <QCARConfig>
   <Tracking>
+    <ImageTarget name="tas_bao" size="1.000000 1.400000" />
     <ImageTarget name="muka_mian" size="1.000000 1.400000" />
     <ImageTarget name="jam_biao" size="1.000000 1.400000" />
     <ImageTarget name="umum_gong" size="1.000000 1.400000" />
-    <ImageTarget name="tas_bao" size="1.000000 1.400000" />
     <ImageTarget name="tangan_shou" size="1.000000 1.400000" />
     <ImageTarget name="sewa_zu" size="1.000000 1.400000" />
     <ImageTarget name="sendiri_zi" size="1.000000 1.400000" />

@@ -27,11 +27,16 @@ public class FreeplaySynthesisManager : MonoBehaviour
     private List<GameObject> cardsOnCamera = new List<GameObject>();
     private Dictionary<string, GameObject> activeSynthesisObjects = new Dictionary<string, GameObject>(); 
     private Dictionary<string, GameObject> activeSingleObjects = new Dictionary<string, GameObject>();    
+    private AudioSource sfxSource;
+
 
     private void Awake()
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
+
+        sfxSource = gameObject.AddComponent<AudioSource>();
+        sfxSource.playOnAwake = false;
     }
 
     private void Update()
@@ -237,7 +242,8 @@ public class FreeplaySynthesisManager : MonoBehaviour
                 Vector3 spawnPos = CalculateCentroid(recipe.requiredCards);
                 GameObject obj = Instantiate(recipe.resultPrefab, spawnPos, Quaternion.identity);
                 activeSynthesisObjects.Add(recipe.recipeName, obj);
-                
+                if (recipe.recipeSuccessSound != null)
+                sfxSource.PlayOneShot(recipe.recipeSuccessSound);
                 Debug.Log($"[Freeplay] Berhasil memunculkan combo: {recipe.recipeName}");
             }
         }
